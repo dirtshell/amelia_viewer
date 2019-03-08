@@ -1,31 +1,60 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Home Page</title>
-    <link rel="stylesheet" href="assets/css/nativize.css">
-    <link rel="stylesheet" href="assets/css/global.css">
-    <link rel="stylesheet" href="assets/css/demo.css">
-    <style>
-        body {
-          font-family: system, -apple-system, '.SFNSText-Regular', 'SF UI Text', 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, sans-serif;
-          color: #fff;
-          background-color: rgb(94, 197, 255);
-          text-align: center;
-          font-size: 40px;
+<head>
+    <meta charset="utf-8">
+    <title>Ricoh Theta V API Testing</title>
+    <meta name="description" content="360 Video — A-Frame">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        const THETA_IP = "192.168.50.227";
+        const CORS_PROXY = "http://localhost:8010/proxy";
+
+        // Performs digest authentication with the Ricoh
+        // Must be called before any other communication is made
+        // See this for more info: https://stackoverflow.com/a/5288679
+        // Response Headers from Ricoh:
+        //      Digest realm="RICOH THETA V", qop="auth", nonce="kE26MhKmReGdbzvIk8A+QQ==", algorithm=MD5
+        function authenticateWithRicoh() {
+            // 1. Challenge the server for a protected resource
+            console.log("Challenging Ricoh for digest info");
+            var client = new XMLHttpRequest();
+            client.open("GET", CORS_PROXY + "/osc/info", true);
+            client.send();
+            client.onreadystatechange = function() {
+                if(this.readyState == this.DONE) {
+                    var headers = client.getAllResponseHeaders();
+                    console.log("Received headers: " + headers);
+                }
+            }
         }
 
-        h2 {
-          padding: 0;
-          margin: 0;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+
+        // Gets the ricoh camera's state
+        function getRicohState() {
+            console.log("Getting the ricoh state");
+            var data = null;
+
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function () {
+              if (this.readyState === this.DONE) {
+                console.log(this.responseText);
+              }
+            });
+
+            xhr.open("POST", CORS_PROXY + "/osc/state");
+
+            xhr.send(data);
         }
-    </style>
-  </head>
-  <body>
-      <h2>Initialize a video connection by going to <code>Application > Settings</code></h2>
-  </body>
+
+    </script>
+</head>
+
+<body>
+    <p> Testing the Ricoh Theta V API </p>
+    <button onclick="authenticateWithRicoh()">Digest Authenticate</button>
+    <button onclick="getRicohState()">Fetch Ricoh State</button>
+    <button onclick="setRicohSettings()">Set Ricoh Settings</button>
+</body>
 </html>

@@ -4,11 +4,17 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "concurrently \"electron .\" \"lcp --proxyUrl http://192.168.50.227\"",
+    "proxy": "lcp --proxyUrl http://192.168.50.227"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "concurrently": "^4.1.0",
+    "cors-anywhere": "^0.4.1",
+    "live-server": "^1.2.1",
+    "local-cors-proxy": "^1.0.2"
+  },
   "devDependencies": {
     "electron": "^4.0.6"
   }
