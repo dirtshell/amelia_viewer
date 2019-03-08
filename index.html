@@ -7,6 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         const THETA_IP = "192.168.50.227";
+        const CORS_ANYWHERE = "http://0.0.0.0:8080";
         const CORS_PROXY = "http://localhost:8010/proxy";
 
         // Performs digest authentication with the Ricoh
@@ -18,7 +19,7 @@
             // 1. Challenge the server for a protected resource
             console.log("Challenging Ricoh for digest info");
             var client = new XMLHttpRequest();
-            client.open("GET", CORS_PROXY + "/osc/info", true);
+            client.open("GET", CORS_ANYWHERE + "/" + THETA_IP + "/osc/info", true);
             client.send();
             client.onreadystatechange = function() {
                 if(this.readyState == this.DONE) {

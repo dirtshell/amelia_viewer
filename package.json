@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "concurrently \"electron .\" \"lcp --proxyUrl http://192.168.50.227\"",
+    "start": "electron .",
     "proxy": "lcp --proxyUrl http://192.168.50.227"
   },
   "author": "",
