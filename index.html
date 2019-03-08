@@ -5,6 +5,9 @@
     <title>Ricoh Theta V API Testing</title>
     <meta name="description" content="360 Video — A-Frame">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/assets/js/md5.js"></script>
+    <script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+    <script type="text/javascript" src="/assets/js/digestAuthRequest.min.js"></script>
     <script>
         const THETA_IP = "192.168.50.227";
         const CORS_ANYWHERE = "http://0.0.0.0:8080";
@@ -13,22 +16,119 @@
         // Performs digest authentication with the Ricoh
         // Must be called before any other communication is made
         // See this for more info: https://stackoverflow.com/a/5288679
-        // Response Headers from Ricoh:
-        //      Digest realm="RICOH THETA V", qop="auth", nonce="kE26MhKmReGdbzvIk8A+QQ==", algorithm=MD5
         function authenticateWithRicoh() {
-            // 1. Challenge the server for a protected resource
+
             console.log("Challenging Ricoh for digest info");
             var client = new XMLHttpRequest();
             client.open("GET", CORS_ANYWHERE + "/" + THETA_IP + "/osc/info", true);
             client.send();
             client.onreadystatechange = function() {
                 if(this.readyState == this.DONE) {
-                    var headers = client.getAllResponseHeaders();
-                    console.log("Received headers: " + headers);
+                    this.scheme = null; // we just echo the scheme, to allow for 'Digest', 'X-Digest', 'JDigest' etc
+                    this.nonce = null; // server issued nonce
+                    this.realm = null; // server issued realm
+                    this.qop = null; // "quality of protection" - '' or 'auth' or 'auth-int'
+                    this.nc = 1; // nonce count - increments with each request used with the same nonce (should be 0?)
+                    this.cnonce = generateCnonce(); // client nonce
+                    this.algorithm = null;
+                    this.challenge_method = "GET";    // method used for challenge
+                    this.uri = THETA_IP + "/osc/info";    // uri for the challenge resource (should i include CORS forward?)
+                    this.username = "THETAYL00164391";  // theta username
+                    this.password = "00164391"; // theta password
+                    this.challenge_response = null;   // challenge response
+                    var headers = this.getAllResponseHeaders();
+                    //console.log(headers);
+
+                    // Get the www-authentication token vals and save them
+                    var ws = '(?:(?:\\r\\n)?[ \\t])+';
+                    var token = '(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2E\\x30-\\x39\\x3F\\x41-\\x5A\\x5E-\\x7A\\x7C\\x7E]+)';
+                    var quotedString = '"(?:[\\x00-\\x0B\\x0D-\\x21\\x23-\\x5B\\\\x5D-\\x7F]|'+ws+'|\\\\[\\x00-\\x7F])*"';
+                    var tokenizer = RegExp(token+'(?:=(?:'+quotedString+'|'+token+'))?', 'g');
+                    var tokens = this.getResponseHeader("www-authenticate").match(tokenizer);
+                    for (var i = 0; i < tokens.length; i++) {
+                        var current_token = tokens[i].replace(/['"]+/g, '');    // remove quotes
+                        current_token = current_token.split(/=(.+)/);           // split at first '='
+                        //console.log("Checking " + current_token);
+                        if (current_token[0] == "Digest") {
+                            // Check for scheme
+                            this.scheme = current_token;
+                        } else if (current_token[0] == "nonce") {
+                            // Check for nonce
+                            this.nonce = current_token[1];
+                        } else if (current_token[0] == "qop") {
+                            // Check for qop
+                            this.qop = current_token[1];
+                        } else if (current_token[0] == "realm") {
+                            // Check for realm
+                            this.realm = current_token[1];
+                        } else if (current_token[0] == "algorithm") {
+                            // Check for algorithm
+                            this.algorithm = current_token[1];
+                        }
+                    }
+                    //console.log("www-authenticate content:\n" + 
+                    //    "\tscheme = " + this.scheme + "\n" + 
+                    //    "\tnonce = " + this.nonce + "\n" +
+                    //    "\tqop = " + this.qop + "\n" + 
+                    //    "\trealm = " + this.realm + "\n" + 
+                    //    "\talgorithm = " + this.algorithm);
+
+                    // Hash the params and generate a new request
+                    // HA1 = MD5(username:realm:pass) eg jake:ricoh theta v:mypass
+                    // HA2 = MD5(method:uri) eg GET:192.168.50.227/osc/info ???
+                    // response = MD5(HA1 + ":" + nonce + ":" nonce_count + ":" + cnonce + ":" + qop + ":" + HA2)
+                    var HA1 = md5(this.username + ":" + this.realm + ":" + this.password);
+                    var HA2 = md5(this.challenge_method + ":" + CORS_ANYWHERE + "/" + THETA_IP + "/osc/info")
+                    this.challenge_response = md5(HA1 + ":" + this.nonce + 
+                        ":" + this.nc + ":" + this.cnonce + ":" + this.qop + 
+                        ":" + HA2);
+                    //console.log("Challenge method = " + this.challenge_method);
+                    //console.log("Challenge URI = " + this.uri);
+                    //console.log("HA1 = " + HA1);
+                    //console.log("HA2 = " + HA2);
+                    //console.log("Response = " + this.challenge_response);
+
+                    // Try again while setting the authentication values
+                    var authenticatedRequest = new XMLHttpRequest();
+                    authenticatedRequest.open(this.challenge_method, CORS_ANYWHERE + "/" + THETA_IP + "/osc/info", true);
+                    authenticatedRequest.timeout = 10000;
+                    var digestAuthHeader = this.scheme + ' '  + 
+                        'username="'+this.username+'", '+
+                        'realm="'+this.realm+'", '+
+                        'nonce="'+this.nonce+'", '+
+                        'uri="'+CORS_ANYWHERE + '/' + THETA_IP + '/osc/info", '+
+                        'response="'+this.challenge_response+'", '+
+                        'qop='+this.qop+', '+
+                        'nc='+this.nc+', '+    // maybe change
+                        'cnonce="'+this.cnonce+'"';
+                    authenticatedRequest.setRequestHeader('Authorization', digestAuthHeader);
+                    //console.log("Authentication Header: " + digestAuthHeader);
+
+                    authenticatedRequest.onreadystatechange = function() {
+                        if (this.readyState == this.DONE) {
+                            if (this.status == 200) {
+                                console.log("HUZZAH! Succesfully authenticated!");
+                            } else {
+                                console.log("Uh oh something went wrong authenticating...");
+                            }
+                        }
+                    }
+                    authenticatedRequest.send();
                 }
             }
         }
 
+
+        // Generates a random string used for auth
+        function generateCnonce() {
+            var characters = 'abcdef0123456789';
+            var token = '';
+            for (var i = 0; i < 16; i++) {
+                var randNum = Math.round(Math.random() * characters.length);
+                token += characters.substr(randNum, 1);
+            }
+            return token;
+        }
 
         // Gets the ricoh camera's state
         function getRicohState() {
@@ -44,7 +144,7 @@
               }
             });
 
-            xhr.open("POST", CORS_PROXY + "/osc/state");
+            xhr.open("POST", CORS_ANYWHERE + "/" + THETA_IP + "/osc/state");
 
             xhr.send(data);
         }
