@@ -121,6 +121,12 @@
             // make the request
             getRequest.request(function(data) {
                 console.log(data);
+
+                // Reset the sizes of the preview and the preview container
+                document.getElementById('preview_image').setAttribute(
+                    "style","width:"+w+"px;height:"+h+"px");
+                document.getElementById('preview_container').setAttribute(
+                    "style","width:"+w+"px;height:"+h+"px");
             },function(errorCode) {
                 console.log("Failure: " + errorCode);
             }, postData);
@@ -250,7 +256,11 @@
 <body>
     <div id="theta_control_panel">
         <p>Ricoh Theta Control Panel</p>
-        <button onclick="setThetaLivePreview()">Set the Theta's Live Preview Settings</button>
+        <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
         <button onclick="getThetaInfo()">Fetch Theta Info</button>
         <button onclick="getThetaState()">Fetch Theta State</button>
         <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
