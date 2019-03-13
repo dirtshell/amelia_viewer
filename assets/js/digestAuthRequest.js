@@ -8,13 +8,8 @@
  * method = 'GET' or 'POST'
  * url = URL endpoint for the HTTP request
  * username, password = username and password for the service
- * streaming = wether or not the data is being streamed
- *
- * If the `streaming = true` then the `responseType` on the XMLHttpRequest is
- * set to 
  */
-var digestAuthRequest = function (method, url, username, password, 
-        streaming = false) {
+var digestAuthRequest = function (method, url, username, password) {
 	var self = this;
 
 
@@ -27,13 +22,9 @@ var digestAuthRequest = function (method, url, username, password,
 	this.nc = 1; // nonce count - increments with each request used with the same nonce
 	this.cnonce = null; // client nonce
 
-    // Streaming variables
-    this.frameCount = 0;
-    this.streaming = streaming;
-
 	// settings
 	this.timeout = 10000; // timeout
-	this.loggingOn = true; // toggle console logging
+	this.loggingOn = false; // toggle console logging
 
 	// determine if a post, so that request will send data
 	this.post = false;
@@ -163,9 +154,6 @@ var digestAuthRequest = function (method, url, username, password,
 		self.response = self.formulateResponse();
 		self.authenticatedRequest = new XMLHttpRequest();
 		self.authenticatedRequest.open(method, url, true);
-		if (self.streaming == false) {
-            self.authenticatedRequest.timeout = self.timeout;
-        }
 		var digestAuthHeader = self.scheme+' '+
 			'username="'+username+'", '+
 			'realm="'+self.realm+'", '+
@@ -185,18 +173,6 @@ var digestAuthRequest = function (method, url, username, password,
 			self.authenticatedRequest.setRequestHeader('Content-type', 'application/json');
 		}
 	
-        // handle streaming data
-        if (streaming == true) {
-            console.log("I see you are trying to stream...");
-            self.authenticatedRequest.onprogress = function(event) {
-                console.log("Endpoint of prev frame = " + this.prevLength);
-                this.prevLength = self.authenticatedRequest.response.length;
-                console.log("Response length = " + 
-                    self.authenticatedRequest.response.length);
-                console.log(self.authenticatedRequest.response);
-            }
-        }
-
         // handle succesfully completing the request
         self.authenticatedRequest.onload = function() {
 			// success

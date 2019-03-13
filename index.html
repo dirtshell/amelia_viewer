@@ -5,6 +5,7 @@
     <title>Ricoh Theta V API Testing</title>
     <meta name="description" content="360 Video with A-Frame">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
     <script>
@@ -14,9 +15,12 @@
         const THETA_USER = "THETAYL00164391";
         const THETA_PASS = "00164391";
 
-        // Disables the sleep and auto-power off on the Theta
-        // `sleepDelay = 65535` disables auto sleep
-        // `offDelay = 65535` disables auto off after standby (or 0?)
+
+        /*
+         * Disables the sleep and auto-power off on the Theta
+         *  `sleepDelay = 65535` disables auto sleep
+         *  `offDelay = 65535` disables auto off after standby (or 0?)
+         */
         function setThetaNeverSleep() {
             console.log("Disabling the Theta's sleep and autopower off");
             var endpoint = "/osc/commands/execute";
@@ -42,8 +46,11 @@
 
         }
 
-        // Gets the ricoh camera's info
-        function getRicohInfo() {
+
+        /*
+         * Gets the Theta's info
+         */
+        function getThetaInfo() {
             console.log("Getting the ricoh info");
             var endpoint = "/osc/info";
             var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
@@ -58,8 +65,11 @@
             });
         }
 
-        // Gets the ricoh camera's info
-        function getRicohState() {
+
+        /* 
+         * Gets the Theta's state
+         */
+        function getThetaState() {
             console.log("Getting the ricoh state");
             var endpoint = "/osc/state";
             var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
@@ -74,16 +84,38 @@
                 console.log("Failure: " + errorCode);
             }, postData);
         }
+        
 
-        // Gets a live preview from the camera
-        function getRicohLivePreview() {
-            console.log("Getting the ricoh's live preview");
+        /*
+         * Sets the Theta's live preview resolution and framerate
+         * 
+         * Valid Configs (w, h, fps):
+         *  - 1920, 960, 8
+         *  - 1024, 512, 30
+         *  - 1024, 512, 8
+         *  - 640, 320, 30
+         *  - 640, 320, 8
+         */
+        function setThetaLivePreview(w=640, h=320, fps=30) {
+            console.log("Setting the live preview settings to\n" + 
+                "\tWidth: " + w + "\n\tHeight: " + h + "\n\tFPS: " + fps);
             var endpoint = "/osc/commands/execute";
             var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
             var getRequest = new digestAuthRequest('POST', url, THETA_USER, 
-                THETA_PASS, true);
-            var postData = { "name": "camera.getLivePreview" };
-            
+                THETA_PASS);
+            var postData = { 
+                "name": "camera.setOptions",
+                "parameters": {
+                    "options": {
+                        "previewFormat": {
+                            "width": w,
+                            "height": h,
+                            "framerate": fps
+                        }
+                    }
+                }
+            };
+
             // make the request
             getRequest.request(function(data) {
                 console.log(data);
@@ -93,13 +125,133 @@
         }
 
 
+        /*
+         * Gets a live preview from the camera
+         */
+        function getThetaLivePreview() {
+            const endpoint = "/osc/commands/execute";
+            const url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
+            const postData = { name: "camera.getLivePreview" };
+            
+            const SOI = new Uint8Array(2);
+            SOI[0] = 0xFF;
+            SOI[1] = 0xD8;
+            const CONTENT_LENGTH = 'Content-Length';
+            const TYPE_JPEG = 'image/jpeg';
+
+            // Use digest fetch
+            const digestOptions = {
+              cnonceSize: 16,  // length of cnonce, default: 32
+              logger: console, // logger for debug, default: none
+              algorithm: 'MD5' // only 'MD5' is supported now
+            }
+            const client = new DigestClient(THETA_USER, THETA_PASS, digestOptions) 
+
+            client.fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(postData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    throw Error(response.status+' '+response.statusText)
+                }
+
+                if (!response.body) {
+                    throw Error('ReadableStream not yet supported in this browser.')
+                }
+                
+                const reader = response.body.getReader();
+
+                let headers = '';
+                let contentLength = -1;
+                let imageBuffer = null;
+                let bytesRead = 0;
+
+
+                // calculating fps. This is pretty lame. Should probably implement a floating window function.
+                let frames = 0;
+                
+                setInterval(() => {
+                    console.log("fps : " + frames);
+                    frames = 0;
+                }, 1000) 
+
+
+                const read = () => {
+
+                    reader.read().then(({done, value}) => {
+                        if (done) {
+                            controller.close();
+                            return;
+                        }
+                        
+                        for (let index =0; index < value.length; index++) {
+                            
+                            // we've found start of the frame. Everything we've read till now is the header.
+                            if (value[index] === SOI[0] && value[index+1] === SOI[1]) {
+                                contentLength = getLength(headers);
+                                imageBuffer = new Uint8Array(new ArrayBuffer(contentLength));
+                            }
+                            // we're still reading the header.
+                            if (contentLength <= 0) {
+                                headers += String.fromCharCode(value[index]);
+                            }
+                            // we're now reading the jpeg. 
+                            else if (bytesRead < contentLength){
+                                imageBuffer[bytesRead++] = value[index];
+                            }
+                            // we're done reading the jpeg. Time to render it. 
+                            else {
+                                // console.log("jpeg read with bytes : " + bytesRead);
+                                document.getElementById('preview_image').src = URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG}));
+                                frames++;
+                                contentLength = 0;
+                                bytesRead = 0;
+                                headers = '';
+                            }
+                        }
+
+                        read();
+                    }).catch(error => {
+                        console.error(error);
+                    })
+                }
+                
+                read();
+                
+            }).catch(error => {
+                console.error(error);
+            })
+        
+            // Gets the length of an MJPEG chunk from the headers of a stream
+            const getLength = (headers) => {
+                let contentLength = -1;
+                headers.split('\n').forEach((header, _) => {
+                    const pair = header.split(':');
+                    if (pair[0] === CONTENT_LENGTH) {
+                    contentLength = pair[1];
+                    }
+                })
+                return contentLength;
+            };
+        }
     </script>
 </head>
 
 <body>
-    <p> Testing the Ricoh Theta V API </p>
-    <button onclick="getRicohInfo()">Fetch Ricoh Info</button>
-    <button onclick="getRicohState()">Fetch Ricoh State</button>
-    <button onclick="getRicohLivePreview()">Get Live Preview</button>
+    <div id="theta_control_panel">
+        <p>Ricoh Theta Control Panel</p>
+        <button onclick="setThetaLivePreview()">Set the Theta's Live Preview Settings</button>
+        <button onclick="getThetaInfo()">Fetch Theta Info</button>
+        <button onclick="getThetaState()">Fetch Theta State</button>
+        <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
+        <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
+    </div>
+    <div id="live_preview">
+        <img id="preview_image" width="640" height="320"/>
+        <canvas id="preview_canvas" width="640" height="320"></canvas>
+    </div>
 </body>
 </html>
