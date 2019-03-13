@@ -1,0 +1,26 @@
+/* Overlay text for the video preview */
+#preview_overlay_text {
+    z-index: 100;
+    position: absolute;
+    color: fuchsia;
+    font-size: 12px;
+    font-weight: bold;
+    right: 15px;
+    top: 0px;
+}
+
+/* Image element where the MJPEG is rendered */
+#preview_image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1024px;
+    height: 512px;
+}
+
+/* Container for holding the preview stream */
+#preview_container {
+    position: relative;
+    width: 1024px;
+    height: 512px;
+}

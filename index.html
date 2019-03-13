@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>Ricoh Theta V API Testing</title>
     <meta name="description" content="360 Video with A-Frame">
+    <link rel="stylesheet" type="text/css" href="/assets/css/global.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
@@ -96,7 +98,7 @@
          *  - 640, 320, 30
          *  - 640, 320, 8
          */
-        function setThetaLivePreview(w=640, h=320, fps=30) {
+        function setThetaLivePreview(w=1024, h=512, fps=30) {
             console.log("Setting the live preview settings to\n" + 
                 "\tWidth: " + w + "\n\tHeight: " + h + "\n\tFPS: " + fps);
             var endpoint = "/osc/commands/execute";
@@ -170,11 +172,15 @@
                 let bytesRead = 0;
 
 
-                // calculating fps. This is pretty lame. Should probably implement a floating window function.
+                // calculating fps and mb/s. This is pretty lame. Should probably implement a floating window function.
                 let frames = 0;
-                
+                let bytesThisSecond = 0;
                 setInterval(() => {
-                    console.log("fps : " + frames);
+                    //console.log("fps : " + frames);
+                    //console.log("MBps: " + (bytesThisSecond / 1000000).toFixed(3));
+                    document.getElementById("preview_overlay_text").innerHTML =
+                        "FPS: " + frames + "<br>Mbps: " + (bytesThisSecond/(1000000/8)).toFixed(3);
+                    bytesThisSecond = 0;
                     frames = 0;
                 }, 1000) 
 
@@ -201,10 +207,11 @@
                             // we're now reading the jpeg. 
                             else if (bytesRead < contentLength){
                                 imageBuffer[bytesRead++] = value[index];
+                                bytesThisSecond++;
                             }
                             // we're done reading the jpeg. Time to render it. 
                             else {
-                                // console.log("jpeg read with bytes : " + bytesRead);
+                                //console.log("jpeg read with bytes : " + bytesRead);
                                 document.getElementById('preview_image').src = URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG}));
                                 frames++;
                                 contentLength = 0;
@@ -249,9 +256,10 @@
         <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
         <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
     </div>
-    <div id="live_preview">
-        <img id="preview_image" width="640" height="320"/>
-        <canvas id="preview_canvas" width="640" height="320"></canvas>
+    <div id="preview_container">
+        <p id="preview_overlay_text">FPS: 0<br>Mbps: 0</p>
+        <img id="preview_image"/>
+        <!-- <canvas id="preview_canvas" width="640" height="320"></canvas> -->
     </div>
 </body>
 </html>
