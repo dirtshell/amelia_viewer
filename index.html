@@ -28,13 +28,13 @@
             init: function() {
                 var data = this.data;
                 var el = this.el;
-
+    
                 el.addEventListener(data.trigger_event, function(e) {
                     //console.log("Received rerender event with object URL = " + e.detail);
-                    el.setAttribute('src', e.detail);
-                    this.material.needsUpdate = true;
+                    el.object3DMap.mesh.material.map.image.src = e.detail;
+                    el.object3DMap.mesh.material.map.needsUpdate = true;
                 });
-            }
+            },
         });
 
         //**blob to dataURL**
