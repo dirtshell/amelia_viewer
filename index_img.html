@@ -7,45 +7,9 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/global.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
-    <!-- A-Frame Setup -->
-    <script>
-        /*
-         * A-Frame component that rerenders the image in an `<a-sky>` whenever a
-         * `rerender_sky` event is occurs. `rerender_sky` events are triggered
-         * whenever a new frame is received, but can be setup to be triggered
-         * on an interval to achieve a framerate independent of the actual video
-         * framerate.
-         */
-        AFRAME.registerComponent('refresh-event', {
-            schema: {
-                trigger_event: {type: 'string'},    // event that triggers the refresh
-            },
-
-            init: function() {
-                var data = this.data;
-                var el = this.el;
-
-                el.addEventListener(data.trigger_event, function(e) {
-                    //console.log("Received rerender event with object URL = " + e.detail);
-                    el.setAttribute('src', e.detail);
-                    this.material.needsUpdate = true;
-                });
-            }
-        });
-
-        //**blob to dataURL**
-        function blobToDataURL(blob, callback) {
-            var a = new FileReader();
-            a.onload = function(e) {callback(e.target.result);}
-            return a.readAsDataURL(blob);
-        }
-    </script>
-    
-    <!-- Ricoh Theta API Interactions -->
     <script>
         const THETA_IP_BOS = "192.168.1.27";
         const THETA_IP_ROC = "192.168.50.227";
@@ -159,10 +123,10 @@
                 console.log(data);
 
                 // Reset the sizes of the preview and the preview container
-                //document.getElementById('preview_image').setAttribute(
-                //    "style","width:"+w+"px;height:"+h+"px");
-                //document.getElementById('preview_container').setAttribute(
-                //    "style","width:"+w+"px;height:"+h+"px");
+                document.getElementById('preview_image').setAttribute(
+                    "style","width:"+w+"px;height:"+h+"px");
+                document.getElementById('preview_container').setAttribute(
+                    "style","width:"+w+"px;height:"+h+"px");
             },function(errorCode) {
                 console.log("Failure: " + errorCode);
             }, postData);
@@ -212,16 +176,16 @@
                 let contentLength = -1;
                 let imageBuffer = null;
                 let bytesRead = 0;
-                let lastFrameImgUrl = null;
 
 
                 // calculating fps and mb/s. This is pretty lame. Should probably implement a floating window function.
                 let frames = 0;
                 let bytesThisSecond = 0;
                 setInterval(() => {
-                    console.log("fps : " + frames);
-                    console.log("Mbps: " + (bytesThisSecond / (1000000/8)).toFixed(3));
-                    //document.getElementById("preview_overlay_text").innerHTML = "FPS: " + frames + "<br>Mbps: " + (bytesThisSecond/(1000000/8)).toFixed(3);
+                    //console.log("fps : " + frames);
+                    //console.log("MBps: " + (bytesThisSecond / 1000000).toFixed(3));
+                    document.getElementById("preview_overlay_text").innerHTML =
+                        "FPS: " + frames + "<br>Mbps: " + (bytesThisSecond/(1000000/8)).toFixed(3);
                     bytesThisSecond = 0;
                     frames = 0;
                 }, 1000) 
@@ -254,14 +218,7 @@
                             // we're done reading the jpeg. Time to render it. 
                             else {
                                 //console.log("jpeg read with bytes : " + bytesRead);
-                                //document.getElementById('preview_image').setAttribute(
-                                //    "src",URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG})));
-                                lastFrameImgUrl = URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG}));
-                                var reRenderEvent = new CustomEvent('rerender_preview', 
-                                    { detail: lastFrameImgUrl });
-                                document.getElementById("preview_image").dispatchEvent(reRenderEvent);
-
-
+                                document.getElementById('preview_image').src = URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG}));
                                 frames++;
                                 contentLength = 0;
                                 bytesRead = 0;
@@ -297,9 +254,13 @@
 </head>
 
 <body>
-    <!--<div id="theta_control_panel">
+    <div id="theta_control_panel">
         <p>Ricoh Theta Control Panel</p>
-        <button onclick="setThetaLivePreview()">Set the Theta's Live Preview Settings</button>
+        <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
         <button onclick="getThetaInfo()">Fetch Theta Info</button>
         <button onclick="getThetaState()">Fetch Theta State</button>
         <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
@@ -307,25 +268,8 @@
     </div>
     <div id="preview_container">
         <p id="preview_overlay_text">FPS: 0<br>Mbps: 0</p>
-        <img id="preview_image_img"/>
-    </div>-->
-    <div style="position: relative;">
-        <a-scene>
-            <a-sky id="preview_image" src="/assets/img/lebron.jpg" 
-                refresh-event="trigger_event: rerender_preview"></a-sky>
-        </a-scene>
-        <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
-            <p>Ricoh Theta Control Panel</p>
-            <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
-            <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
-            <button onclick="getThetaInfo()">Fetch Theta Info</button>
-            <button onclick="getThetaState()">Fetch Theta State</button>
-            <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
-            <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
-        </div>
-   </div>
+        <img id="preview_image"/>
+        <!-- <canvas id="preview_canvas" width="640" height="320"></canvas> -->
+    </div>
 </body>
 </html>
