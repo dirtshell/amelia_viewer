@@ -1,3 +1,5 @@
+// TODO: include md5_backup.js
+
 const canRequire = typeof(require) == 'function'
 if (typeof(fetch) !== 'function' && canRequire) var fetch = require('node-fetch')
 // if (typeof(cryptojs) !== 'function' && canRequire) var cryptojs = require('crypto-js')
@@ -7,7 +9,7 @@ class DigestClient {
   constructor(user, password, options={}) {
     this.user = user
     this.password = password
-    this.nonceRaw = 'abcdef0123456789'
+    this.nonceRaw = 'abcdef0123456789'  
     this.digest = { nc: 0, algorithm: options.algorithm || 'MD5' }
     this.hasAuth = false
     const _cnonceSize = parseInt(options.cnonceSize)

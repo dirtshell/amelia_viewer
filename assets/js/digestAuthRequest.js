@@ -2,6 +2,8 @@
 // by @inorganik, modified by Jacob Kenin
 // requires an md5() implementation
 
+// TODO: include md5_backup.js
+
 /*
  * Simple HTTP digest request
  *
