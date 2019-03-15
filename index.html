@@ -11,6 +11,7 @@
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
+
     <!-- A-Frame Setup -->
     <script>
         /*
@@ -31,18 +32,16 @@
     
                 el.addEventListener(data.trigger_event, function(e) {
                     //console.log("Received rerender event with object URL = " + e.detail);
+                    
+                    // Setup an event listener for when the image loads and needs to be updated
+                    // TODO: move this outside this eventlistener
+                    el.object3DMap.mesh.material.map.image.addEventListener('load', function() {
+                        el.object3DMap.mesh.material.map.needsUpdate = true;
+                    });
                     el.object3DMap.mesh.material.map.image.src = e.detail;
-                    el.object3DMap.mesh.material.map.needsUpdate = true;
                 });
             },
         });
-
-        //**blob to dataURL**
-        function blobToDataURL(blob, callback) {
-            var a = new FileReader();
-            a.onload = function(e) {callback(e.target.result);}
-            return a.readAsDataURL(blob);
-        }
     </script>
     
     <!-- Ricoh Theta API Interactions -->
@@ -81,7 +80,6 @@
             },function(errorCode) {
                 console.log("Failure: " + errorCode);
             }, postData);
-
         }
 
 
@@ -157,12 +155,6 @@
             // make the request
             getRequest.request(function(data) {
                 console.log(data);
-
-                // Reset the sizes of the preview and the preview container
-                //document.getElementById('preview_image').setAttribute(
-                //    "style","width:"+w+"px;height:"+h+"px");
-                //document.getElementById('preview_container').setAttribute(
-                //    "style","width:"+w+"px;height:"+h+"px");
             },function(errorCode) {
                 console.log("Failure: " + errorCode);
             }, postData);
@@ -215,13 +207,12 @@
                 let lastFrameImgUrl = null;
 
 
-                // calculating fps and mb/s. This is pretty lame. Should probably implement a floating window function.
+                // calculating fps and mbps. TODO: implement a floating window function.
                 let frames = 0;
                 let bytesThisSecond = 0;
                 setInterval(() => {
                     console.log("fps : " + frames);
                     console.log("Mbps: " + (bytesThisSecond / (1000000/8)).toFixed(3));
-                    //document.getElementById("preview_overlay_text").innerHTML = "FPS: " + frames + "<br>Mbps: " + (bytesThisSecond/(1000000/8)).toFixed(3);
                     bytesThisSecond = 0;
                     frames = 0;
                 }, 1000) 
@@ -254,14 +245,15 @@
                             // we're done reading the jpeg. Time to render it. 
                             else {
                                 //console.log("jpeg read with bytes : " + bytesRead);
-                                //document.getElementById('preview_image').setAttribute(
-                                //    "src",URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG})));
-                                lastFrameImgUrl = URL.createObjectURL(new Blob([imageBuffer], {type: TYPE_JPEG}));
-                                var reRenderEvent = new CustomEvent('rerender_preview', 
+                                
+                                // Generate blob of the image and emit event
+                                lastFrameImgUrl = URL.createObjectURL(
+                                    new Blob([imageBuffer], {type: TYPE_JPEG}));
+                                var reRenderEvent = new CustomEvent('new_frame_loaded', 
                                     { detail: lastFrameImgUrl });
                                 document.getElementById("preview_image").dispatchEvent(reRenderEvent);
 
-
+                                // Reset for the frame
                                 frames++;
                                 contentLength = 0;
                                 bytesRead = 0;
@@ -297,35 +289,21 @@
 </head>
 
 <body>
-    <!--<div id="theta_control_panel">
+    <a-scene>
+        <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
+            refresh-event="trigger_event: new_frame_loaded"></a-sky>
+    </a-scene>
+    <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
         <p>Ricoh Theta Control Panel</p>
-        <button onclick="setThetaLivePreview()">Set the Theta's Live Preview Settings</button>
+        <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
+        <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
         <button onclick="getThetaInfo()">Fetch Theta Info</button>
         <button onclick="getThetaState()">Fetch Theta State</button>
         <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
         <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
     </div>
-    <div id="preview_container">
-        <p id="preview_overlay_text">FPS: 0<br>Mbps: 0</p>
-        <img id="preview_image_img"/>
-    </div>-->
-    <div style="position: relative;">
-        <a-scene>
-            <a-sky id="preview_image" src="/assets/img/lebron.jpg" 
-                refresh-event="trigger_event: rerender_preview"></a-sky>
-        </a-scene>
-        <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
-            <p>Ricoh Theta Control Panel</p>
-            <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
-            <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
-            <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
-            <button onclick="getThetaInfo()">Fetch Theta Info</button>
-            <button onclick="getThetaState()">Fetch Theta State</button>
-            <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
-            <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
-        </div>
-   </div>
 </body>
 </html>
