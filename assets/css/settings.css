@@ -1,0 +1,79 @@
+body {
+    display: flex;
+}
+
+.sidenav {
+    width: 200px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    position: fixed;
+    background-color: #266dd3;
+    color: #f2f2f2;
+    box-shadow: 2px 3px 5px 3px #ccc;
+}
+
+.sidenav p {
+    margin: 0px;
+    padding: 6px 12px;
+    font-size: 25px;
+    display: block;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sidenav a {
+    text-decoration: none;
+    outline: none;
+    padding: 6px 12px;
+    font-size: 20px;
+    display: block;
+    color: #add9f4;
+}
+
+.sidenav a:hover {
+    color: #f2f2f2;
+    outline: none;
+}
+
+.sidenav hr {
+    width: 85%;
+    color: #74a2e3;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 7.5%;
+    text-align: center;
+}
+
+.main_content {
+    position: relative;
+    flex-grow: 1;
+    margin-left: 200px; /* Same as the width of the sidenav */
+}
+
+.close_save_area {
+    position: absolute;
+    bottom: 30px;
+    right: 0px;
+}
+
+button {
+    font-size: 20px;
+    outline: none;
+    box-shadow: 2px 2px 3px #ccc;
+    padding: 5px 10px;
+    margin: 0px 5px;
+    border: none;
+    color: #f2f2f2;
+    font-weight: bold;
+    border-radius: 3px;
+}
+
+button.confirm {
+    background-color: #42c97a;
+}
+
+button.cancel {
+    background-color: #c94242;
+}

@@ -1,21 +1,26 @@
 {
   "name": "amelia_viewer",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "A VR viewer for the Ricoh Theta, built for RIT's MSD P19123.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "proxy": "lcp --proxyUrl http://192.168.50.227"
   },
-  "author": "",
+  "author": "Jacob Kenin",
   "license": "ISC",
   "dependencies": {
     "concurrently": "^4.1.0",
     "cors-anywhere": "^0.4.1",
+    "electron-settings": "^3.2.0",
     "live-server": "^1.2.1",
     "local-cors-proxy": "^1.0.2"
   },
   "devDependencies": {
     "electron": "^4.0.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dirtshell/amelia_viewer"
   }
 }

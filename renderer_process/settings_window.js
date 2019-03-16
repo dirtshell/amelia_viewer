@@ -3,8 +3,13 @@
 
 const {BrowserWindow} = require('electron')
 
-let child = new BrowserWindow({parent: top, modal: true, show: false})
+let child = new BrowserWindow({parent: top, modal: true, frame: false, 
+    transparent: true})
 child.loadFile('html/settings.html')
 child.once('ready-to-show', () => {
     child.show()
+})
+
+child.on('closed', () => {
+  child = null
 })

@@ -58,9 +58,6 @@ function createWindow () {
   // Run as a single instance app
   makeSingleInstance()
 
-  // Enable dev tools
-  win.webContents.openDevTools()
-
   // and load the index.html of the app.
   win.loadURL(url.format({
     pathname: "localhost:8181",
