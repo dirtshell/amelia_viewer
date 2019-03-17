@@ -37,6 +37,12 @@ body {
     outline: none;
 }
 
+.selected {
+    color: #f2f2f2!important;
+    outline: none;
+    background-color: #5AB4DF;
+}
+
 .sidenav hr {
     width: 85%;
     color: #74a2e3;

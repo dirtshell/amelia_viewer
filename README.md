@@ -21,7 +21,7 @@ string
         * Connect settings fields to `electron-settings`
         * Sidebar menu
             * Make the edges of the settings window rounded
-            * Add state toggling for the menu labels
+            * ~~Add state toggling for the menu labels and containers~~
             * Add animation to the save and cancel buttons
         * Connection page
         * Video page

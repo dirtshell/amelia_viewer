@@ -1,40 +1,65 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Settings</title>
-        <link rel="stylesheet" href="../assets/css/settings.css">
-        <link rel="stylesheet" href="../assets/css/nativize.css">
-        <link rel="stylesheet" href="../assets/css/global.css">
-        <style>
-            body {
-                margin: 15px 15px 15px 15px;
-            }
-        </style>
-    </head>
-    <body>
-            <div class="sidenav">
-                <p>Settings</p>
-                <hr>
-                <a href="#">Connection</a>
-                <a href="#">Video</a>
-                <a href="#">General</a>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <link rel="stylesheet" href="../assets/css/settings.css">
+    <link rel="stylesheet" href="../assets/css/nativize.css">
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        /**
+         * Toggles the visibility of the settings pages 
+         * Hides all the pages, then makes the selected one visible
+         */
+        function toggleVisibility(item) {
+            // Hide all settings pages
+            document.getElementById("connection_container").style.cssText 
+                += ";display: none;";
+            document.getElementById("video_container").style.cssText 
+                += ";display: none;";
+            document.getElementById("general_container").style.cssText 
+                += ";display: none;";
+            // Disable all the menu labels
+            document.getElementById("video_btn").classList.remove("selected");
+            document.getElementById("general_btn").classList.remove("selected");
+            document.getElementById("connection_btn").classList.remove("selected");
 
-            <div class="main_content">
-                <div id="connection_settings">
-                    <h2>You are on the connection settings page</h2>
-                </div>
-                <div class="hidden" id="video_settings">
-                    <h2>You are on the video settings page</h2>
-                </div>
-                <div class="hidden" id="general_settings">
-                    <h2>You are on the general settings page</h2>
-                </div>
-                <div class="close_save_area">
-                    <button class="confirm" onclick="">Save</button>
-                    <button class="cancel" onclick="window.close()">Close</button>
-                </div>
-            </div>
-    </body>
+            // Make the selected settings page visible and select the menu button
+            var sel_id = item.id.split('_')[0] + '_container';
+            document.getElementById(sel_id).style.cssText += ";display: block;";
+            document.getElementById(item.id).className = "selected";
+        }
+    </script>
+    <style>
+        body {
+            margin: 15px 15px 15px 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidenav">
+        <p>Settings</p>
+        <hr>
+        <a class="selected" id="connection_btn" onclick="toggleVisibility(this)" href="#">Connection</a>
+        <a id="video_btn" onclick="toggleVisibility(this)" href="#">Video</a>
+        <a id="general_btn" onclick="toggleVisibility(this)" href="#">General</a>
+    </div>
+
+    <div class="main_content">
+        <div id="connection_container">
+            <h2>You are on the connection settings page</h2>
+        </div>
+        <div id="video_container" style="display: none;">
+            <h2>You are on the video settings page</h2>
+        </div>
+        <div id="general_container" style="display: none;">
+            <h2>You are on the general settings page</h2>
+        </div>
+        <div class="close_save_area">
+            <button class="confirm" onclick="">Save</button>
+            <button class="cancel" onclick="window.close()">Close</button>
+        </div>
+    </div>
+</body>
 </html>
