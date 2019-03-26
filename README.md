@@ -10,6 +10,21 @@ Built using:
 ### Installation
 TBD
 
+### Example of `settings.json`
+
+```
+{ connection:
+   { ip: '192.168.1.1', username: 'default', password: 'default' },
+  video:
+   { resolution_x: '1920',
+     resolution_y: '960',
+     fps: '30',
+     record_locally: 'true',
+     recording_directory: './made/up/dir' } 
+}
+```
+
+
 ### Goals
 
 * Make the rerender event be imported or something so I don't just have a magic
@@ -21,6 +36,7 @@ string
         * Connect settings fields to `electron-settings`
         * Sidebar menu
             * Make the edges of the settings window rounded
+            * Remove the outline when a button pressed
             * ~~Add state toggling for the menu labels and containers~~
             * Add animation to the save and cancel buttons
         * Connection page

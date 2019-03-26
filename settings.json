@@ -1,0 +1,14 @@
+{
+    "connection": {
+        "ip": "192.168.1.1",
+        "username": "default",
+        "password": "default"
+    },
+    "video": {
+        "resolution_x": "1920",
+        "resolution_y": "960",
+        "fps": "30",
+        "record_locally": "true",
+        "recording_directory": "./made/up/dir"
+    }
+}

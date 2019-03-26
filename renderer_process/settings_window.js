@@ -1,7 +1,8 @@
 // Creates a window used to set the settings for the camera and the video
 // stream
 
-const {BrowserWindow} = require('electron')
+const {BrowserWindow, ipcRenderer} = require('electron')
+const settings = require('electron').remote.require('electron-settings')
 
 let child = new BrowserWindow({parent: top, modal: true, frame: false, 
     transparent: true})
