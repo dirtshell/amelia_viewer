@@ -7,9 +7,6 @@ Built using:
 * A-Frame
 * Three.js
 
-### Installation
-TBD
-
 ### Example of `settings.json`
 
 ```
@@ -30,6 +27,14 @@ TBD
 * Make the rerender event be imported or something so I don't just have a magic
 string
 * Add proper inclusions to my JS because IDK wtf I am doing 
+* Use `127.0.0.1` instead of `0.0.0.0`
+* Get VR with Occulus working with electron
+* Write a script or something to automate the process of making a `.MSI` file
+* Handle error where a node application is not found / loaded
+* Incorporate the network diagnostic functions
+* Incorporate [dhcp-node](https://github.com/infusion/node-dhcp) to replace using tftpd64
+   * Make it run optionally
+   * Give a simple diagnostic / control application that can be launched
 * ~~Add application menu~~
 * Implement a real UI
     * Settings window
