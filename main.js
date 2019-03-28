@@ -60,12 +60,14 @@ function createWindow () {
   // Run as a single instance app
   makeSingleInstance()
 
-  // and load the index.html of the app.
+  // if we ever go back to electron based UI uncomment below
+  /* and load the index.html of the app.
   win.loadURL(url.format({
     pathname: "localhost:8181",
     protocol: 'http:',
     slashes: true
-  }))
+  }))*/
+  win.loadFile('empty_index.html')
 
   // Emitted when the window is closed.
   win.on('closed', () => {
