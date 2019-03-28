@@ -11,21 +11,85 @@
     padding-top: 60px;
 }
 
-/*
-#side_menu a {
-    min-width: 450px;
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 20px;
-    color: #818181;
+.setting_container {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-width: 300px;   /* prevents the text moving on resizing */
     display: block;
-    transition: 0.3s;
 }
-*/
 
-#setting_title {
-    min-width: 450px;
-    padding: 8px 8px 8px 32px;
+/* ===================== */
+/* Custom select element */
+/* ===================== */
+.custom_select {
+    width: 100%;
+    padding-left: 32px;
+    padding-right: 8px;
+}
+
+.custom_select select {
+    display: none;  /* hide original select element */
+}
+
+/* Custom select element to be assigned via javascript */
+.select_selected {
+    background-color: #111;
+}
+
+/* Arrow inside the select element TODO: make white on hover */
+.select_selected:after {
+    position: relative;
+    content: "";
+    top: 6px;
+    float: right;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: red transparent transparent transparent;
+    margin-right: 5px;
+}
+
+/* Point the arrow up when the select box is open */
+.select_selected.select_arrow_active:after {
+    border-color: transparent transparent red transparent;
+    top: 1px;
+    margin-right: 5px;
+}
+
+/* style the items, including the selected item */
+.select_items div,.select_selected {
+    width: 100%;
+    float: right;
+    color: #ffffff;
+    background-color: #818181;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border: 1px solid transparent;
+    border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+    cursor: pointer;
+}
+
+/* style items */
+.select_items {
+    position: relative;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 9999; /* maybe change this */
+}
+
+/* hide the items when the select box is closed */
+.select_hide {
+    display: none;
+}
+
+.select_items div: hover, .same_as_selected {
+    background-color: rgba(0,0,0,0.1);
+}
+
+.setting_title {
+    padding-left: 32px;
+    padding-right: 8px;
     text-decoration: none;
     font-size: 20px;
     color: #818181;
@@ -64,7 +128,7 @@
     transition: 0.3s;
 }
 
-@media screen and (max-height: 450px) {
+@media screen and (max-height: 300px) {
     #side_menu {padding-top: 15px;}
     #side_menu a {font-size: 18px;}
 }

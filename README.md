@@ -24,6 +24,7 @@ Built using:
 
 ### Goals
 
+* Add "Help" setting explanation tidbits to the UI in the browser
 * Make the rerender event be imported or something so I don't just have a magic
 string
 * Add proper inclusions to my JS because IDK wtf I am doing 
