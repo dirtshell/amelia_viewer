@@ -101,4 +101,4 @@ qop=${this.digest.qop},algorithm="{this.digest.algorithm}",response="${response}
 
 }
 
-module.exports = DigestClient
+//module.exports = DigestClient

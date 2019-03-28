@@ -1,0 +1,70 @@
+#side_menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+/*
+#side_menu a {
+    min-width: 450px;
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+*/
+
+#setting_title {
+    min-width: 450px;
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+#side_menu a:hover {
+    color: #f1f1f1;
+}
+
+#menu_open_btn {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    z-index: 1000;
+    font-weight: bold;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+#menu_close_btn {
+    position: absolute;
+    top: 9px;
+    right: 25px;
+    font-size: 25px;
+    font-weight: bold;
+    transform: scale(2, 2);
+    margin-left: 50px;
+    
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+@media screen and (max-height: 450px) {
+    #side_menu {padding-top: 15px;}
+    #side_menu a {font-size: 18px;}
+}

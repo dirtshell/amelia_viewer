@@ -6,6 +6,8 @@
     <meta name="description" content="360 Video with A-Frame">
     <link rel="stylesheet" type="text/css" href="/assets/css/global.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/nativize.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/side_menu.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
@@ -13,13 +15,42 @@
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
     <script type="text/javascript" src="/assets/js/aframe_components.js"></script>
     <script type="text/javascript" src="/assets/js/ricoh_api.js"></script>
+
+    <script>
+        /* Opens the side menu */
+        function openSideMenu() {
+            console.log("opening the side menu");
+            document.getElementById("side_menu").style.width = "300px";
+        }
+
+        /* Closes the side menu */
+        function closeSideMenu() {
+            document.getElementById("side_menu").style.width = "0";
+        }
+    </script>
 </head>
 
 <body>
+    <!-- A-Frame scene populated with Ricoh Theta VR stream -->
     <a-scene>
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
     </a-scene>
+
+    <!-- Side menu -->
+    <span id="menu_open_btn" onclick="openSideMenu()">&#9776;</span>
+    <div id="side_menu">
+        <a href="javascript:void(0)" id="menu_close_btn" onclick="closeSideMenu()">&times;</a>
+        <a id="setting_title" href="#">Resolution</a>
+        <a id="setting_title" href="#">Framerate</a>
+        <a id="setting_title" href="#">Ricoh Theta IP</a>
+        <a id="setting_title" href="#">Ricoh Theta Username</a>
+        <a id="setting_title" href="#">Ricoh Theta Password</a>
+        <a id="setting_title" href="#">Record Locally</a>
+        <a id="setting_title" href="#">Local Storage Directory</a>
+    </div>
+
+    <!--
     <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
         <p>Ricoh Theta Control Panel</p>
         <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
@@ -32,5 +63,6 @@
         <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
         <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
     </div>
+    -->
 </body>
 </html>
