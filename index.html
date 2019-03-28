@@ -77,9 +77,9 @@
         
         <div class="setting_container">
             <a class="setting_title" href="#">Local Storage Directory</a>
-            <label class="custom_dir_input_container">Select a directory...
+            <label id="setting_download_dir" class="custom_dir_input_container">Select a directory...
                 <input type="file" class="custom_dir_input" name="setting_download_dir" 
-                    id="setting_download_dir" onchange="selectFolder(event)" webkitdirectory 
+                    onchange="selectFolder(event)" webkitdirectory 
                     mozdirectory msdirectory odirectory directory multiple />
                 <span class="custom_file_btn fa fa-folder-open"></span>
             </label>
@@ -101,13 +101,15 @@
     </div>
     -->
     <script>
-        /* Selects a folder */
+        /* Selects a folder TODO: get the full path */
         function selectFolder(e) {
+            var iconHtml = "\n<input type=\"file\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\" webkitdirectory=\"\" mozdirectory=\"\" msdirectory=\"\" odirectory=\"\" directory=\"\" multiple=\"\">\n<span class=\"custom_file_btn fa fa-folder-open\"></span>\n"
             var theFiles = e.target.files;
             var relativePath = theFiles[0].webkitRelativePath;
             var folder = relativePath.split("/");
             var folderName = folder[0];
-            console.log("Download directory selected as: " + folderName);
+            document.getElementById("setting_download_dir").innerHTML = 
+                folderName + iconHtml;
         }
 
         /* ==================================== */
