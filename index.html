@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/nativize.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/side_menu.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
@@ -31,31 +32,57 @@
         <a href="javascript:void(0)" id="menu_close_btn" onclick="closeSideMenu()">&times;</a>
         <div class="setting_container">
             <a class="setting_title" href="#">Resolution</a>
-            <div class="custom_select">
+            <div class="custom_select" id="setting_theta_resolution">
                 <select>
-                    <option value="1920,960">1920x960</option>
-                    <option value="1024,512">1024x512</option>
-                    <option value="640,320">640x320</option>
+                    <!-- TODO: why does this not display all values -->
+                    <option value="1920_960">1920x960</option>
+                    <option value="1024_512">1024x512</option>
+                    <option value="640_320">640x320</option>
                 </select>
             </div>
         </div>
+
         <div class="setting_container">
             <a class="setting_title" href="#">Framerate</a>
+            <div class="custom_select">
+                <select id="setting_theta_fps">
+                    <option value="8">8 FPS</option>
+                    <option value="30">30 FPS</option>
+                </select>
+            </div>
         </div>
+        
         <div class="setting_container">
             <a class="setting_title" href="#">Ricoh Theta IP</a>
+            <input type="text" class="custom_text_input" id="setting_theta_ip" value="192.168.1.5">
         </div>
+        
         <div class="setting_container">
             <a class="setting_title" href="#">Ricoh Theta Username</a>
+            <input type="text" class="custom_text_input" id="setting_theta_username" value="THETAYL00164391">
         </div>
+        
         <div class="setting_container">
             <a class="setting_title" href="#">Ricoh Theta Password</a>
+            <input type="text" class="custom_text_input" id="setting_theta_password" value="00164391">
         </div>
+        
         <div class="setting_container">
             <a class="setting_title" href="#">Record Locally</a>
+            <label class="custom_checkbox_container">Enable local recording
+                <input type="checkbox" checked="checked">
+                <span class="checkmark"></span>
+            </label>
         </div>
+        
         <div class="setting_container">
             <a class="setting_title" href="#">Local Storage Directory</a>
+            <label class="custom_dir_input_container">Select a directory...
+                <input type="file" class="custom_dir_input" name="setting_download_dir" 
+                    id="setting_download_dir" onchange="selectFolder(event)" webkitdirectory 
+                    mozdirectory msdirectory odirectory directory multiple />
+                <span class="custom_file_btn fa fa-folder-open"></span>
+            </label>
         </div>
     </div>
 
@@ -74,6 +101,15 @@
     </div>
     -->
     <script>
+        /* Selects a folder */
+        function selectFolder(e) {
+            var theFiles = e.target.files;
+            var relativePath = theFiles[0].webkitRelativePath;
+            var folder = relativePath.split("/");
+            var folderName = folder[0];
+            console.log("Download directory selected as: " + folderName);
+        }
+
         /* ==================================== */
         /* Slide menu controls                  */
         /* ==================================== */
@@ -92,7 +128,7 @@
         /* Code for custom dropdown select menu */
         /* ==================================== */
         var x, i, j, selElmnt, a, b, c;
-        /* Look for any elements with the class "custom-select": */
+        /* Look for any elements with the class "custom_select": */
         x = document.getElementsByClassName("custom_select");
         for (i = 0; i < x.length; i++) {
             selElmnt = x[i].getElementsByTagName("select")[0];
