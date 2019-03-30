@@ -261,6 +261,13 @@
     transition: 0.3s;
 }
 
+#apply_settings_btn {
+    float: right;
+    cursor: pointer;
+    margin-right: 16px;
+    margin-top: 20px;
+}
+
 @media screen and (max-height: 300px) {
     #side_menu {padding-top: 15px;}
     #side_menu a {font-size: 18px;}
