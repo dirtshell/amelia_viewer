@@ -34,8 +34,7 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Resolution</a>
             <div class="custom_select" id="setting_theta_resolution">
-                <select>
-                    <!-- TODO: why does this not display all values -->
+                <select id="setting_theta_resolution">
                     <option value="1920_960">1920x960</option>
                     <option value="1024_512">1024x512</option>
                     <option value="640_320">640x320</option>
@@ -121,7 +120,6 @@
         /* ==================================== */
         /* Opens the side menu */
         function openSideMenu() {
-            console.log("opening the side menu");
             document.getElementById("side_menu").style.width = "300px";
         }
 
@@ -133,26 +131,40 @@
         /* ==================================== */
         /* Code for custom dropdown select menu */
         /* ==================================== */
-        var x, i, j, selElmnt, a, b, c;
-        /* Look for any elements with the class "custom_select": */
+        var selOptionIndex; // index of the selected option in the <select> element
+        var selElmnt;       // <select> element currently being styled
+        var x;              // list of custom <select> elements to be styled
+        var i;              // index of the custom <select> element in x
+        var j;              // index of the option in the current custom <select> element
+        var a, b, c;        // custom divs used to create each option
+        /* On load look for any elements with the class "custom_select" and style them */
         x = document.getElementsByClassName("custom_select");
         for (i = 0; i < x.length; i++) {
             selElmnt = x[i].getElementsByTagName("select")[0];
-            
+            selOptionIndex = selElmnt.options.selectedIndex;
+
             /* For each element, create a new DIV that will act as the selected item: */
             a = document.createElement("DIV");
             a.setAttribute("class", "select_selected");
             a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
             x[i].appendChild(a);
-            
+
             /* For each element, create a new DIV that will contain the option list: */
             b = document.createElement("DIV");
             b.setAttribute("class", "select_items select_hide");
-            for (j = 1; j < selElmnt.length; j++) {
+            for (j = 0; j < selElmnt.length; j++) {
                 /* For each option in the original select element,
                 create a new DIV that will act as an option item: */
                 c = document.createElement("DIV");
                 c.innerHTML = selElmnt.options[j].innerHTML;
+                
+                /* Shim for setting the color for the selected option on load before an
+                   option is actually clicked */
+                if (selOptionIndex == j) {
+                    c.setAttribute("class", "same_as_selected");
+                }
+
+                /* Bind select function for when an option is clicked */
                 c.addEventListener("click", function(e) {
                     /* When an item is clicked, update the original select box,
                     and the selected item: */

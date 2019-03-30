@@ -189,8 +189,12 @@
     display: none;
 }
 
-.select_items div: hover, .same_as_selected {
-    background-color: rgba(0,0,0,0.1);
+.same_as_selected {
+    background-color: rgb(83,83,83) !important;
+}
+
+.select_items div:hover{
+    background-color: rgb(83, 83, 83);
 }
 
 
@@ -220,9 +224,6 @@
 }
 
 .setting_title {
-    /*
-    padding-left: 32px;
-    padding-right: 8px;*/
     text-decoration: none;
     font-size: 20px;
     color: #818181;
@@ -252,8 +253,7 @@
     font-weight: bold;
     transform: scale(2, 2);
     margin-left: 50px;
-    
-    padding: 8px 8px 8px 32px;
+    padding: 8px 8px 8px 8px;
     text-decoration: none;
     font-size: 20px;
     color: #818181;
