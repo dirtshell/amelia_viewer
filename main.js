@@ -17,7 +17,7 @@ const liveServer = require("live-server")
 let myPath = path.resolve(__dirname, '.');
 const liveServerParams = {
     port: 8181, // Set the server port. Defaults to 8080.
-    host: "0.0.0.0", // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
+    host: "127.0.0.1", // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
     root: myPath, // Set root directory that's being served. Defaults to cwd.
     open: false, // When false, it won't load your browser by default.
     ignore: 'scss,my/templates', // comma-separated string for paths to ignore
@@ -34,7 +34,7 @@ liveServer.start(liveServerParams);
 // Setup a reverse proxy to avoid CORS issues
 // ============================================================================
 // Listen on a specific host via the HOST environment variable
-var host = process.env.HOST || '0.0.0.0';
+var host = process.env.HOST || '127.0.0.1';
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 8080;
 

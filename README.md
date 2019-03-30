@@ -24,6 +24,10 @@ Built using:
 
 ### Goals
 
+* Add a "Connected / Not Connected" message to the main view telling people to 
+  connect using the button.
+    * Add a "Connect / Disconnect" button in the top right
+* Add ability to detect failure to connect to the theta 
 * Add "Help" setting explanation tidbits to the UI in the browser
 * Make the rerender event be imported or something so I don't just have a magic
 string

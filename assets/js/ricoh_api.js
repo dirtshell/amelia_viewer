@@ -1,13 +1,73 @@
-const THETA_IP_BOS = "192.168.1.27";    // IP of the theta on my network in BOS
-const THETA_IP_ROC = "192.168.50.227";  // IP of the theta on my network in ROC
-const CORS_ANYWHERE = "http://0.0.0.0:8080";    // Address for CORS reverse proxy
-const THETA_USER = "THETAYL00164391";   // Username for the theta (aka serial #)
-const THETA_PASS = "00164391"; // Password for the theta (last part of serial #)
-const RERENDER_EVENT = "new_frame_loaded";  // name for the rerender event
-const SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
+var CORS_ANYWHERE = "http://127.0.0.1:8080";    // Address for CORS reverse proxy
+var RERENDER_EVENT = "new_frame_loaded";  // name for the rerender event
+var SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
+
+/* SETTINGS */
+var settings = {
+    theta_ip: "255.255.255.255",    // IP of the theta
+    theta_user: "THETAYL00164391",  // Username for the theta (aka serial #)
+    theta_pass: "00164391",         // Password for the theta (last part of serial #)
+    theta_res_x: 1024,              // horizontal resolution of the stream
+    theta_res_y: 512,               // vertical resolution of the stream
+    theta_fps: 30,                  // fps of the stream
+    record_locally: false,          // wether or not to record the video locally
+    record_dir: ""                  // where to record the video locally
+};
+    
 
 // TODO: include digest-fetch-src.js
 // TODO: include digestAuthRequest.js
+
+/*
+ * Verifies the Theta IP with a simple test
+ *
+ * Uses a naive approach where if we can communicate but not use the API then 
+ * we assume the IP is correct and return true. Otherwise its false.
+ *
+ * TODO: ping the webserver on the theta and return true if it responds with 
+ *       what we expect.
+ */
+function verifyThetaIp(ip = settings.theta_ip) {
+    console.log("Checking to see if passed IP is the Theta V's IP...");
+    var endpoint = "/osc/state";
+    var url = CORS_ANYWHERE + "/" + ip + endpoint;
+    var req = new XMLHttpRequest();
+
+    req.onreadystatechange = function() {
+        if (req.readyStaet == XMLHttpRequest.DONE) {
+            console.log(req.status);
+            if (req.status == 403) {    // auth denied
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    req.open('GET', url);
+    req.send();
+}
+
+/*
+ * Verifies the login credentials for the Theta V
+ *
+ * Assumes valid IP. Returns true when able to succesfully authenticate, false
+ * otherwise.
+ */
+function verifyThetaLogin(user = settings.theta_user, 
+        pass = settings.theta_pass) {
+    console.log("Checking login credentials for Theta V");
+    var endpoint = "/osc/info";
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var getRequest = new digestAuthRequest('GET', url, user, pass);
+    
+    // make the request
+    getRequest.request(function(data) {
+        console.log(data);
+    },function(errorCode) {
+        console.log("Failure: " + errorCode);
+    });
+}
 
 /*
  * Disables the sleep and auto-power off on the Theta
@@ -17,9 +77,9 @@ const SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
 function setThetaNeverSleep() {
     console.log("Disabling the Theta's sleep and autopower off");
     var endpoint = "/osc/commands/execute";
-    var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
-    var getRequest = new digestAuthRequest('POST', url, THETA_USER, 
-        THETA_PASS);
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var getRequest = new digestAuthRequest('POST', url, settings.theta_user, 
+        settings.theta_pass);
     var postData = { 
         "name": "camera.setOptions",
         "parameters": {
@@ -45,13 +105,14 @@ function setThetaNeverSleep() {
 function getThetaInfo() {
     console.log("Getting the ricoh info");
     var endpoint = "/osc/info";
-    var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
-    var getRequest = new digestAuthRequest('GET', url, THETA_USER, 
-        THETA_PASS);
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var getRequest = new digestAuthRequest('GET', url, settings.theta_user, 
+        settings.theta_pass);
     
     // make the request
     getRequest.request(function(data) {
         console.log(data);
+        return data;
     },function(errorCode) {
         console.log("Failure: " + errorCode);
     });
@@ -64,9 +125,9 @@ function getThetaInfo() {
 function getThetaState() {
     console.log("Getting the ricoh state");
     var endpoint = "/osc/state";
-    var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
-    var getRequest = new digestAuthRequest('POST', url, THETA_USER, 
-        THETA_PASS);
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var getRequest = new digestAuthRequest('POST', url, settings.theta_user, 
+        settings.theta_pass);
     var postData = null;
 
     // make the request
@@ -88,13 +149,14 @@ function getThetaState() {
  *  - 640, 320, 30
  *  - 640, 320, 8
  */
-function setThetaLivePreview(w=1024, h=512, fps=30) {
+function setThetaLivePreview(w=settings.theta_res_x, h=settings.theta_res_y, 
+        fps=settings.theta_fps) {
     console.log("Setting the live preview settings to\n" + 
         "\tWidth: " + w + "\n\tHeight: " + h + "\n\tFPS: " + fps);
     var endpoint = "/osc/commands/execute";
-    var url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
-    var getRequest = new digestAuthRequest('POST', url, THETA_USER, 
-        THETA_PASS);
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var getRequest = new digestAuthRequest('POST', url, settings.theta_user, 
+        settings.theta_pass);
     var postData = { 
         "name": "camera.setOptions",
         "parameters": {
@@ -122,7 +184,7 @@ function setThetaLivePreview(w=1024, h=512, fps=30) {
  */
 function getThetaLivePreview() {
     const endpoint = "/osc/commands/execute";
-    const url = CORS_ANYWHERE + "/" + THETA_IP_BOS + endpoint;
+    const url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
     const postData = { name: "camera.getLivePreview" };
     
     const SOI = new Uint8Array(2);
@@ -137,7 +199,7 @@ function getThetaLivePreview() {
       logger: console, // logger for debug, default: none
       algorithm: 'MD5' // only 'MD5' is supported now
     }
-    const client = new DigestClient(THETA_USER, THETA_PASS, digestOptions) 
+    const client = new DigestClient(settings.theta_user, settings.theta_pass, digestOptions) 
 
     client.fetch(url, {
         method: 'POST',

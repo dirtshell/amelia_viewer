@@ -34,7 +34,7 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Resolution</a>
             <div class="custom_select" id="setting_theta_resolution">
-                <select id="setting_theta_resolution">
+                <select id="setting_theta_resolution_selector">
                     <option value="1920_960">1920x960</option>
                     <option value="1024_512">1024x512</option>
                     <option value="640_320">640x320</option>
@@ -71,7 +71,7 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Record Locally</a>
             <label class="custom_checkbox_container">Enable local recording
-                <input type="checkbox" checked="checked">
+                <input type="checkbox" id="record_locally_checkbox" checked="checked">
                 <span class="checkmark"></span>
             </label>
         </div>
@@ -79,14 +79,15 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Local Storage Directory</a>
             <label id="setting_download_dir" class="custom_dir_input_container">Select a directory...
-                <input type="file" class="custom_dir_input" name="setting_download_dir" 
+                <input type="file" id="record_dir_field" class="custom_dir_input" name="setting_download_dir" 
                     onchange="selectFolder(event)" webkitdirectory 
                     mozdirectory msdirectory odirectory directory multiple />
                 <span class="custom_file_btn fa fa-folder-open"></span>
             </label>
         </div>
 
-        <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue">Apply</button>
+        <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue"
+            onclick="saveAndApplySettings()">Apply</button>
     </div>
 
     <!--
@@ -104,15 +105,63 @@
     </div>
     -->
     <script>
-        /* Selects a folder TODO: get the full path */
-        function selectFolder(e) {
-            var iconHtml = "\n<input type=\"file\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\" webkitdirectory=\"\" mozdirectory=\"\" msdirectory=\"\" odirectory=\"\" directory=\"\" multiple=\"\">\n<span class=\"custom_file_btn fa fa-folder-open\"></span>\n"
-            var theFiles = e.target.files;
-            var relativePath = theFiles[0].webkitRelativePath;
-            var folder = relativePath.split("/");
-            var folderName = folder[0];
-            document.getElementById("setting_download_dir").innerHTML = 
-                folderName + iconHtml;
+        /* ======================= */
+        /* Apply settings function */
+        /* ======================= */
+        /* 
+         * Saves the settings, and then applies them using the Ricoh API.
+         *
+         * On success / failure, a message should pop up in a message queue on
+         * the side menu.
+         */
+        function saveAndApplySettings() {
+            /* Save the new settings */
+            // Get the new settings
+            var new_theta_ip = document.getElementById("setting_theta_ip").value;
+            var new_theta_user = document.getElementById("setting_theta_username").value;
+            var new_theta_pass = document.getElementById("setting_theta_password").value;
+            var new_theta_res_x = document.getElementById("setting_theta_resolution_selector").
+                value.split("_")[0];
+            var new_theta_res_y = document.getElementById("setting_theta_resolution_selector").
+                value.split("_")[1];
+            var new_theta_fps = document.getElementById("setting_theta_fps").value;
+            var new_record = document.getElementById("record_locally_checkbox").checked;
+            var new_record_dir = document.getElementById("record_dir_field").value; // TODO: figure this out
+
+            // Verify res and fps are valid combo
+            if (new_theta_res_x == "1920" && new_theta_res_y == "960" 
+                && new_theta_fps == "30") {
+                console.log("Invalid FPS and resolution combo: " + 
+                    new_theta_res_x + "x" + new_theta_res_y + " @ " + new_theta_fps + 
+                    " FPS");
+                return;
+            }
+
+            // Save the settings
+            settings.theta_ip = new_theta_ip;
+            settings.theta_user = new_theta_user;
+            settings.theta_pass = new_theta_pass;
+            settings.theta_res_x = parseInt(new_theta_res_x);
+            settings.theta_res_y = parseInt(new_theta_res_y);
+            settings.theta_fps = parseInt(new_theta_fps);
+            settings.record_locally = new_record;
+            settings.record_dir = new_record_dir;
+
+
+            /* Apply the settings using the Ricoh API */
+            // verify IP
+            var valid_ip = verifyThetaIp(settings.theta_ip);
+            console.log("Valid IP: " + valid_ip);    
+
+            // verify username / pass
+            var valid_login = verifyThetaLogin(settings.theta_user, settings.theta_pass);
+            console.log("Valid Login: " + valid_login);
+
+            // set never sleep
+            // set livepreview info
+            
+
+            /* Tell user success / failure */
         }
 
         /* ==================================== */
@@ -224,6 +273,21 @@
         /* If the user clicks anywhere outside the select box,
         then close all select boxes: */
         document.addEventListener("click", closeAllSelect);
+        
+        /* ================================================ */
+        /* Selects a folder and updates the dir picker text */
+        /* ================================================ */
+        function selectFolder(e) {
+            // TODO: get full path
+            var iconHtml = "\n<input type=\"file\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\" webkitdirectory=\"\" mozdirectory=\"\" msdirectory=\"\" odirectory=\"\" directory=\"\" multiple=\"\">\n<span class=\"custom_file_btn fa fa-folder-open\"></span>\n"
+            var theFiles = e.target.files;
+            var relativePath = theFiles[0].webkitRelativePath;
+            var folder = relativePath.split("/");
+            var folderName = folder[0];
+            document.getElementById("setting_download_dir").innerHTML = 
+                folderName + iconHtml;
+        }
+
     </script>
 </body>
 </html>
