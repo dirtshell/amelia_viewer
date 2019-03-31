@@ -55,9 +55,9 @@ string
 * Write a Ricoh Theta to allow for 4K @ 30 FPS
 * ~~Method for stopping a stream~~
 * Method to detect the stream disconnecting
-    * Be sure to update `thetaStatus.streaming` when we DC
+    * Be sure to emit event when we DC
     * Stop recording when we DC
 * Auto reset video stream when resolution changes
 * Add recording feature
 * Actually test with Occulus lol
-
+* Use `const myEvent = new Event(EVENT_NAME)` instead of creating them everytime

@@ -1,7 +1,9 @@
 /* Constants */
-var CORS_ANYWHERE = "http://127.0.0.1:8080";    // Address for CORS reverse proxy
-var RERENDER_EVENT = "new_frame_loaded";  // name for the rerender event
-var SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
+const CORS_ANYWHERE = "http://127.0.0.1:8080";    // Address for CORS reverse proxy
+const RERENDER_EVENT = "new_frame_loaded";  // name for the rerender event
+const STREAM_STOPPED_EVENT = "stream_stopped";
+const STREAM_STARTED_EVENT = "stream_started";
+const SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
 
 /* SETTINGS */
 var settings = {
@@ -30,6 +32,12 @@ var thetaStatus = {
         this.streamingListener = listener;
     }
 }
+
+document.addEventListener(STREAM_STOPPED_EVENT, function (e) { 
+    thetaStatus.streaming = false; }, false);
+
+document.addEventListener(STREAM_STARTED_EVENT, function (e) {
+    thetaStatus.streaming = true; }, false);
 
 
 // TODO: include digest-fetch-src.js
@@ -188,6 +196,8 @@ function stopThetaLivePreview() {
             console.log(data);
             clearInterval(retryIntervalId); // stop attempting to stop
             thetaStatus.streaming = false;  // stop getThetaLivePreview()
+            var stopEvent = new Event(STREAM_STOPPED_EVENT);
+            document.dispatchEvent(stopEvent);
         },function(errorCode) {
         }, stopData);
         
@@ -198,7 +208,6 @@ function stopThetaLivePreview() {
     };
     var retryIntervalId = setInterval(stopRecording, 500);
 }
-
 
 /*
  * Gets a live preview from the camera
@@ -248,7 +257,12 @@ function getThetaLivePreview() {
         let bytesRead = 0;
         let lastFrameImgUrl = null;
 
-        thetaStatus.streaming = true;   // we are connected and streaming
+        // Signal that we have started streaming
+        var startEvent = new Event(STREAM_STARTED_EVENT);
+        document.dispatchEvent(startEvent);
+
+        // Stop when the stream stops
+        document.addEventListener(STREAM_STOPPED_EVENT, function(e) { return; }, false);
 
         // calculating fps and mbps. TODO: implement a floating window function.
         let frames = 0;
@@ -264,7 +278,7 @@ function getThetaLivePreview() {
         const read = () => {
 
             reader.read().then(({done, value}) => {
-                if (done || !thetaStatus.streaming) {
+                if (done) {
                     controller.close(); // idk what this is for
                     return;
                 }
@@ -315,7 +329,9 @@ function getThetaLivePreview() {
         read();
         
     }).catch(error => {
-        thetaStatus.streaming = false;  // we are no longer connected
+        //thetaStatus.streaming = false;  // we are no longer connected
+        var stopEvent = new Event(STREAM_STOPPED_EVENT);
+        document.dispatchEvent(stopEvent);
         console.error(error);
     })
 
@@ -331,3 +347,4 @@ function getThetaLivePreview() {
         return contentLength;
     };
 }
+

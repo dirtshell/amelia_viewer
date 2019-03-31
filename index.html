@@ -103,7 +103,18 @@
         /* ======================================= */
         /* Updates the "connect/disconnect" button */
         /* ======================================= */
-        thetaStatus.registerListener(function(val) {
+        document.addEventListener(STREAM_STOPPED_EVENT, function (e) {
+                // we are disconnected, so show the connect btn
+                document.getElementById("connect_btn").style.display = "inline";
+                document.getElementById("disconnect_btn").style.display = "none";
+            }, false);
+        document.addEventListener(STREAM_STARTED_EVENT, function (e) {
+                // we are disconnected, so show the connect btn
+                document.getElementById("connect_btn").style.display = "none";
+                document.getElementById("disconnect_btn").style.display = "inline";
+            }, false);
+
+        /*thetaStatus.registerListener(function(val) {
             console.log("Value of thetaStatus.streaming was changed to " + val);
             if (val == false) {
                 // we are disconnected, so show the connect btn
@@ -114,7 +125,7 @@
                 document.getElementById("connect_btn").style.display = "none";
                 document.getElementById("disconnect_btn").style.display = "inline";
             }
-        });
+        });*/
 
         /* ======================= */
         /* Apply settings function */
@@ -164,6 +175,9 @@
             setThetaLivePreview(settings.theta_res_x, settings.theta_res_y, 
                 settings.theta_fps);
             
+            // If we are currently streaming, restart the stream
+
+
             // TODO: inform user of success / failure
         }
 
