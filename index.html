@@ -169,13 +169,31 @@
             settings.record_locally = new_record;
             settings.record_dir = new_record_dir;
 
-            // Prevent the Theta from goin going in to sleep mode
-            setThetaNeverSleep();
-            // Set the streaming resolution
-            setThetaLivePreview(settings.theta_res_x, settings.theta_res_y, 
-                settings.theta_fps);
-            
-            // If we are currently streaming, restart the stream
+            // Configure the Theta via the API
+            try {
+                // Prevent the Theta from goin going in to sleep mode
+                setThetaNeverSleep();
+                // Set the streaming resolution
+                setThetaLivePreview(settings.theta_res_x, settings.theta_res_y, 
+                    settings.theta_fps);
+                // If we are currently streaming, restart the stream
+                if (thetaStatus.streaming) {
+                    stopThetaLivePreview();
+                    document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
+                            getThetaLivePreview();
+                            // I know there is a better way to do this but IDGAF im tired
+                            document.removeEventListener(e.type, arguments.callee);
+                        }, false);
+                }
+            } catch (error) {
+                console.log("Failed to configure the Ricoh Theta V with the following options:" + 
+                    "\n\tIP: " + settings.theta_ip +
+                    "\n\tUSER: " + settings.theta_user + 
+                    "\n\tPASS: " + settings.theta_pass + 
+                    "\n\tRESOLUTION: " + settings.theta_res_x + "x" + settings.theta_res_y +
+                    "\n\tFPS: " + settings.theta_fps + 
+                    "\nWith error " + error);
+            }
 
 
             // TODO: inform user of success / failure

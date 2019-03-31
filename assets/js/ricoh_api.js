@@ -70,7 +70,7 @@ function setThetaNeverSleep() {
     getRequest.request(function(data) {
         console.log(data);
     },function(errorCode) {
-        console.log("Failure: " + errorCode);
+        throw(errorCode);
     }, postData);
 }
 
@@ -110,7 +110,7 @@ function getThetaState() {
     getRequest.request(function(data) {
         console.log(data);
     },function(errorCode) {
-        console.log("Failure: " + errorCode);
+        throw(errorCode);
     }, postData);
 }
 
@@ -150,7 +150,7 @@ function setThetaLivePreview(w=settings.theta_res_x, h=settings.theta_res_y,
     getRequest.request(function(data) {
         console.log(data);
     },function(errorCode) {
-        console.log("Failure: " + errorCode);
+        throw(errorCode);
     }, postData);
 }
 
@@ -172,7 +172,7 @@ function stopThetaLivePreview() {
     startRequest.request(function(data) {
         console.log(data);
     },function(errorCode) {
-        console.log("Failure: " + errorCode);
+        throw errorCode;
     }, startData);
 
 
@@ -199,6 +199,7 @@ function stopThetaLivePreview() {
             var stopEvent = new Event(STREAM_STOPPED_EVENT);
             document.dispatchEvent(stopEvent);
         },function(errorCode) {
+            throw errorCode;
         }, stopData);
         
         // Stop retrying if we are at max tries
