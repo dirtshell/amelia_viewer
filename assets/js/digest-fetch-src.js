@@ -14,7 +14,7 @@ class DigestClient {
     this.hasAuth = false
     const _cnonceSize = parseInt(options.cnonceSize)
     this.cnonceSize = isNaN(_cnonceSize) ? 32 : _cnonceSize // cnonce length 32 as default
-    this.logger = options.logger
+    this.logger = false // options.logger
   }
 
   async fetch (url, options={}) {

@@ -9,8 +9,11 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/nativize.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/side_menu.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/flat_buttons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/css/all.min.css">
+    <script type="text/javascript" src="/assets/js/all.min.js"></script>
+    <script type="text/javascript" src="/assets/js/async.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/async.min.js"></script>
     <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
@@ -91,29 +94,26 @@
                 onclick="saveAndApplySettings()">Apply</button>
             <button id="connect_btn" class="btn btn-square btn-filled-green"
                 onclick="getThetaLivePreview()">Connect</button>
+            <button id="disconnect_btn" class="btn btn-square btn-lg btn-filled-red"
+                onclick="stopThetaLivePreview()" style="display: none;">Disconnect</button>
         </div>
     </div>
 
-    <!--
-    <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
-        <p>Ricoh Theta Control Panel</p>
-        <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
-        <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
-        <button onclick="getThetaInfo()">Fetch Theta Info</button>
-        <button onclick="getThetaState()">Fetch Theta State</button>
-        <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
-        <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
-    </div>
-    -->
     <script>
         /* ======================================= */
         /* Updates the "connect/disconnect" button */
         /* ======================================= */
         thetaStatus.registerListener(function(val) {
             console.log("Value of thetaStatus.streaming was changed to " + val);
+            if (val == false) {
+                // we are disconnected, so show the connect btn
+                document.getElementById("connect_btn").style.display = "inline";
+                document.getElementById("disconnect_btn").style.display = "none";
+            } else {
+                // we are connected, so show the disconnect btn
+                document.getElementById("connect_btn").style.display = "none";
+                document.getElementById("disconnect_btn").style.display = "inline";
+            }
         });
 
         /* ======================= */
@@ -144,6 +144,7 @@
                 && new_theta_fps == "30") {
                 console.log("Invalid resolution and fps combo: " + new_theta_res_x + 
                     "x" + new_theta_res_y + " @ " + new_theta_fps + " FPS");
+                // TODO: inform user
                 return false;
             }
         

@@ -24,6 +24,8 @@ Built using:
 
 ### Goals
 
+* replace the font awesome folder icon with just a regular icon, since its 
+  ~1.7mb of data for just one icon...
 * rename "settings_container" class to "side_menu_container" 
 * Add "Exit VR" button to A-Frame view
 * Combine the calls to disable sleep mode and set resolution, or create some
@@ -32,13 +34,14 @@ Built using:
 * Add a "Connected / Not Connected" message to the main view telling people to 
   connect using the button.
     * ~~Add a "Connect / Disconnect" button~~ 
-    * toggle state of the connect/disconnect button
+    * ~~toggle state of the connect/disconnect button~~
+    * Add message to the aframe vr display saying when we have lost connection
 * Add ability to detect failure to connect to the theta 
 * Add "Help" setting explanation tidbits to the UI in the browser
-* Make the rerender event be imported or something so I don't just have a magic
+* Make the rerender event name be imported or something so I don't just have a magic
 string
 * Add proper inclusions to my JS because IDK wtf I am doing 
-* Use `127.0.0.1` instead of `0.0.0.0`
+* ~~Use `127.0.0.1` instead of `0.0.0.0`~~
 * Get VR with Occulus working with electron
 * Write a script or something to automate the process of making a `.MSI` file
 * Handle error where a node application is not found / loaded
@@ -47,26 +50,14 @@ string
    * Make it run optionally
    * Give a simple diagnostic / control application that can be launched
 * ~~Add application menu~~
-* Implement a real UI
-    * Settings window
-        * Connect settings fields to `electron-settings`
-        * Sidebar menu
-            * Make the edges of the settings window rounded
-            * Remove the outline when a button pressed
-            * ~~Add state toggling for the menu labels and containers~~
-            * Add animation to the save and cancel buttons
-        * Connection page
-        * Video page
-        * General page
-    * Home screen
-    * VR View
 * ~~Reorganize code so we don't have a ton of JS code in `index.html`~~
 * Rewrite FPS and Mbps calculation code
 * Write a Ricoh Theta to allow for 4K @ 30 FPS
-* Method for stopping a stream
+* ~~Method for stopping a stream~~
+* Method to detect the stream disconnecting
+    * Be sure to update `thetaStatus.streaming` when we DC
+    * Stop recording when we DC
 * Auto reset video stream when resolution changes
-    * Stop recording with old res
-    * Start recording with new res
 * Add recording feature
 * Actually test with Occulus lol
 

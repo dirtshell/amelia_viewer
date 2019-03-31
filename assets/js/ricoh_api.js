@@ -34,6 +34,8 @@ var thetaStatus = {
 
 // TODO: include digest-fetch-src.js
 // TODO: include digestAuthRequest.js
+// TODO: include asyn.min.js
+
 
 /*
  * Disables the sleep and auto-power off on the Theta
@@ -144,9 +146,64 @@ function setThetaLivePreview(w=settings.theta_res_x, h=settings.theta_res_y,
     }, postData);
 }
 
+/*
+ * Stops a live preview from the camera by taking a video
+ * TODO: delete the temp video created to stop the stream
+ * TODO: find a better way of stopping the recording
+ */
+function stopThetaLivePreview() {
+    // Start a capture
+    console.log("Stop the Theta live preview");
+    var endpoint = "/osc/commands/execute";
+    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
+    var startRequest = new digestAuthRequest('POST', url, settings.theta_user, 
+        settings.theta_pass);
+    var startData = { 
+        "name": "camera.startCapture",
+    };
+    startRequest.request(function(data) {
+        console.log(data);
+    },function(errorCode) {
+        console.log("Failure: " + errorCode);
+    }, startData);
+
+
+    // SUPER grimey way to make sure we stop recording 
+    // TODO: use async, since this method doesn't wait for the prev req to fail
+    var maxIters = 10;
+    var iterNum = 0;
+    const stopRecording = function () {
+        var result;
+        iterNum = iterNum + 1;
+        
+        console.log("Trying to stop the recording (attempt " + iterNum + ")");
+        var stopRequest = new digestAuthRequest('POST', url, settings.theta_user, 
+            settings.theta_pass);
+        var stopData = { 
+            "name": "camera.stopCapture",
+        };
+
+        // make the request
+        stopRequest.request(function(data) {
+            console.log(data);
+            clearInterval(retryIntervalId); // stop attempting to stop
+            thetaStatus.streaming = false;  // stop getThetaLivePreview()
+        },function(errorCode) {
+        }, stopData);
+        
+        // Stop retrying if we are at max tries
+        if (iterNum >= maxIters) {
+            clearInterval(retryIntervalId);
+        }
+    };
+    var retryIntervalId = setInterval(stopRecording, 500);
+}
+
 
 /*
  * Gets a live preview from the camera
+ * This is a modified version of this: https://github.com/aruntj/mjpeg-readable-stream/blob/master/index.html
+ * TODO: automatically stop when the theta stops sending video using timeout or something
  */
 function getThetaLivePreview() {
     const endpoint = "/osc/commands/execute";
@@ -197,8 +254,8 @@ function getThetaLivePreview() {
         let frames = 0;
         let bytesThisSecond = 0;
         setInterval(() => {
-            console.log("fps : " + frames);
-            console.log("Mbps: " + (bytesThisSecond / (1000000/8)).toFixed(3));
+            //console.log("fps : " + frames);
+            //console.log("Mbps: " + (bytesThisSecond / (1000000/8)).toFixed(3));
             bytesThisSecond = 0;
             frames = 0;
         }, 1000) 
@@ -207,8 +264,8 @@ function getThetaLivePreview() {
         const read = () => {
 
             reader.read().then(({done, value}) => {
-                if (done) {
-                    controller.close();
+                if (done || !thetaStatus.streaming) {
+                    controller.close(); // idk what this is for
                     return;
                 }
                 

@@ -275,6 +275,15 @@
     margin-right: 8px;
 }
 
+#disconnect_btn {
+    width: 120px;
+    float: right;
+    padding: 10px 17.5px 10px 17.5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
 @media screen and (max-height: 300px) {
     #side_menu {padding-top: 15px;}
     #side_menu a {font-size: 18px;}
