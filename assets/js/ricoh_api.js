@@ -269,8 +269,8 @@ function getThetaLivePreview() {
         let frames = 0;
         let bytesThisSecond = 0;
         setInterval(() => {
-            //console.log("fps : " + frames);
-            //console.log("Mbps: " + (bytesThisSecond / (1000000/8)).toFixed(3));
+            var mbps = (bytesThisSecond / (1000000/8)).toFixed(3);
+            console.log("fps : " + frames + " @ " + mbps + " Mbps");
             bytesThisSecond = 0;
             frames = 0;
         }, 1000) 

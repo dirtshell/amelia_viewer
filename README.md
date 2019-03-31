@@ -61,3 +61,4 @@ string
 * Add recording feature
 * Actually test with Occulus lol
 * Use `const myEvent = new Event(EVENT_NAME)` instead of creating them everytime
+* Change bitrate of recorded video based on resolution and FPS

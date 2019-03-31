@@ -22,27 +22,17 @@
     <script type="text/javascript" src="/assets/js/ricoh_api.js"></script>
     <script type="text/javascript" src="/assets/js/StreamSaver.js"></script>
     <script type="text/javascript" src="/assets/js/polyfill.min.js"></script>
-    <!--<script>
-        	// it also support commonJs and amd
-        import { createWriteStream, supported, version } from 'StreamSaver'
-        const { createWriteStream, supported, version } = require('StreamSaver')
-        const { createWriteStream, supported, version } = window.streamSaver
-        console.log( supported )
-    </script>-->
 </head>
 
 <body>
     <!-- A-Frame scene populated with Ricoh Theta VR stream -->
-    <!--
     <a-scene>
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
     </a-scene>
-    -->
 
     <!-- Hidden canvas used to save video -->
-    <!-- TODO: may need to set the size of this element -->
-    <canvas id="hidden_stream_canvas"></canvas>
+    <canvas id="hidden_stream_canvas" style="display: none"></canvas>
 
     <!-- Side menu -->
     <span id="menu_open_btn" onclick="openSideMenu()">&#9776;</span>
@@ -52,7 +42,6 @@
             <a class="setting_title" href="#">Resolution</a>
             <div class="custom_select" id="setting_theta_resolution">
                 <select id="setting_theta_resolution_selector">
-                    <!-- TODO: why does this not display all values -->
                     <option value="1920_960">1920x960</option>
                     <option value="1024_512">1024x512</option>
                     <option value="640_320">640x320</option>
@@ -114,9 +103,9 @@
     </div>
 
     <script>
-        /* ================================ */
-        /* Saves the streamed video locally */
-        /* ================================ */
+        /* ================================== */
+        /* Records the streamed video locally */
+        /* ================================== */
         // Redraw each image to the hidden canvas so we can record it
         var canvas = document.getElementById("hidden_stream_canvas");
         var canvas_ctx = canvas.getContext("2d");
@@ -129,7 +118,6 @@
             }, false);
         
         // Start saving the stream whenever we connect and have "record" enabled
-        // TODO: add promises?
         document.addEventListener(STREAM_STARTED_EVENT, function(e) {
                 if (settings.record_locally) {
                     // Check supported MIME types
@@ -150,15 +138,13 @@
                     var recordedChunks = [];    // stores all the video chunks
                     var stream = canvas.captureStream(settings.theta_fps);
                     var timeslice = 1000;   // save the blob every 1000 ms
-                    var options = {mimeType: 'video/webm'};
+                    var options = {mimeType: 'video/webm'}; // TODO: vary bitrate by res+fps
                     var recorder = new MediaRecorder(stream, options);
                     recorder.ondataavailable = handleDataAvailable;
                     recorder.start(timeslice);   
 
                     function handleDataAvailable(event) {
-                        console.log("... handleDataAvailable triggered");
                         if (event.data.size > 0) {
-                            console.log("... saving " + event.data.size + " bytes to recordedChunks");
                             recordedChunks.push(event.data);
                         }
                     }
@@ -174,19 +160,10 @@
                             a.href = vidUrl;
                             a.download = getDateTime() + '_stream.webm';
                             a.click();
+                            console.log("Recording stopped. Prompting user to save.");
                             window.URL.revokeObjectURL(vidUrl);
                             return; // destroys the listner?
                         }, false);
-                    
-                    /* alternate way of setting on data available 
-                    recorder.ondataavailable = function(e) {
-                        chunks.push(e.data);
-                    }
-    
-                    recorder.onstop = function(e) {
-                        console.log("stopping the recording...");
-
-                    }*/
                 }
             }, false);
         
