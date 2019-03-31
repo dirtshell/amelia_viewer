@@ -264,8 +264,15 @@
 #apply_settings_btn {
     float: right;
     cursor: pointer;
-    margin-right: 16px;
-    margin-top: 20px;
+}
+
+#connect_btn {
+    width: 120px;
+    float: right;
+    padding: 10px 30px 10px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 8px;
 }
 
 @media screen and (max-height: 300px) {

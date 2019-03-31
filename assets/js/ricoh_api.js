@@ -1,3 +1,4 @@
+/* Constants */
 var CORS_ANYWHERE = "http://127.0.0.1:8080";    // Address for CORS reverse proxy
 var RERENDER_EVENT = "new_frame_loaded";  // name for the rerender event
 var SKYBOX_ID = "preview_image";  // id of <a-sky> element to render stream to
@@ -13,61 +14,26 @@ var settings = {
     record_locally: false,          // wether or not to record the video locally
     record_dir: ""                  // where to record the video locally
 };
-    
+
+/* STATUS */
+var thetaStatus = {
+    streamingInternal: false,
+    streamingListener: function(val) {},
+    set streaming(val) {
+        this.streamingInternal = val;
+        this.streamingListener(val);
+    },
+    get streaming() {
+        return this.streamingInternal;
+    },
+    registerListener: function(listener) {
+        this.streamingListener = listener;
+    }
+}
+
 
 // TODO: include digest-fetch-src.js
 // TODO: include digestAuthRequest.js
-
-/*
- * Verifies the Theta IP with a simple test
- *
- * Uses a naive approach where if we can communicate but not use the API then 
- * we assume the IP is correct and return true. Otherwise its false.
- *
- * TODO: ping the webserver on the theta and return true if it responds with 
- *       what we expect.
- */
-function verifyThetaIp(ip = settings.theta_ip) {
-    console.log("Checking to see if passed IP is the Theta V's IP...");
-    var endpoint = "/osc/state";
-    var url = CORS_ANYWHERE + "/" + ip + endpoint;
-    var req = new XMLHttpRequest();
-
-    req.onreadystatechange = function() {
-        if (req.readyStaet == XMLHttpRequest.DONE) {
-            console.log(req.status);
-            if (req.status == 403) {    // auth denied
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    req.open('GET', url);
-    req.send();
-}
-
-/*
- * Verifies the login credentials for the Theta V
- *
- * Assumes valid IP. Returns true when able to succesfully authenticate, false
- * otherwise.
- */
-function verifyThetaLogin(user = settings.theta_user, 
-        pass = settings.theta_pass) {
-    console.log("Checking login credentials for Theta V");
-    var endpoint = "/osc/info";
-    var url = CORS_ANYWHERE + "/" + settings.theta_ip + endpoint;
-    var getRequest = new digestAuthRequest('GET', url, user, pass);
-    
-    // make the request
-    getRequest.request(function(data) {
-        console.log(data);
-    },function(errorCode) {
-        console.log("Failure: " + errorCode);
-    });
-}
 
 /*
  * Disables the sleep and auto-power off on the Theta
@@ -216,6 +182,7 @@ function getThetaLivePreview() {
             throw Error('ReadableStream not yet supported in this browser.')
         }
         
+
         const reader = response.body.getReader();
 
         let headers = '';
@@ -224,6 +191,7 @@ function getThetaLivePreview() {
         let bytesRead = 0;
         let lastFrameImgUrl = null;
 
+        thetaStatus.streaming = true;   // we are connected and streaming
 
         // calculating fps and mbps. TODO: implement a floating window function.
         let frames = 0;
@@ -290,6 +258,7 @@ function getThetaLivePreview() {
         read();
         
     }).catch(error => {
+        thetaStatus.streaming = false;  // we are no longer connected
         console.error(error);
     })
 

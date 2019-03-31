@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <title>Ricoh Theta in VR</title>
     <meta name="description" content="360 Video with A-Frame">
-    <link rel="stylesheet" type="text/css" href="/assets/css/flat_buttons.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/global.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/nativize.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/side_menu.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/flat_buttons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
@@ -35,6 +35,7 @@
             <a class="setting_title" href="#">Resolution</a>
             <div class="custom_select" id="setting_theta_resolution">
                 <select id="setting_theta_resolution_selector">
+                    <!-- TODO: why does this not display all values -->
                     <option value="1920_960">1920x960</option>
                     <option value="1024_512">1024x512</option>
                     <option value="640_320">640x320</option>
@@ -46,7 +47,6 @@
             <a class="setting_title" href="#">Framerate</a>
             <div class="custom_select">
                 <select id="setting_theta_fps">
-                    <!-- TODO: limit these options based on the resolution selected -->
                     <option value="8">8 FPS</option>
                     <option value="30">30 FPS</option>
                 </select>
@@ -71,7 +71,7 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Record Locally</a>
             <label class="custom_checkbox_container">Enable local recording
-                <input type="checkbox" id="record_locally_checkbox" checked="checked">
+                <input id="record_locally_checkbox" type="checkbox" checked="checked">
                 <span class="checkmark"></span>
             </label>
         </div>
@@ -86,8 +86,12 @@
             </label>
         </div>
 
-        <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue"
-            onclick="saveAndApplySettings()">Apply</button>
+        <div class="setting_container">
+            <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue"
+                onclick="saveAndApplySettings()">Apply</button>
+            <button id="connect_btn" class="btn btn-square btn-filled-green"
+                onclick="getThetaLivePreview()">Connect</button>
+        </div>
     </div>
 
     <!--
@@ -105,6 +109,13 @@
     </div>
     -->
     <script>
+        /* ======================================= */
+        /* Updates the "connect/disconnect" button */
+        /* ======================================= */
+        thetaStatus.registerListener(function(val) {
+            console.log("Value of thetaStatus.streaming was changed to " + val);
+        });
+
         /* ======================= */
         /* Apply settings function */
         /* ======================= */
@@ -131,37 +142,28 @@
             // Verify res and fps are valid combo
             if (new_theta_res_x == "1920" && new_theta_res_y == "960" 
                 && new_theta_fps == "30") {
-                console.log("Invalid FPS and resolution combo: " + 
-                    new_theta_res_x + "x" + new_theta_res_y + " @ " + new_theta_fps + 
-                    " FPS");
-                return;
+                console.log("Invalid resolution and fps combo: " + new_theta_res_x + 
+                    "x" + new_theta_res_y + " @ " + new_theta_fps + " FPS");
+                return false;
             }
-
-            // Save the settings
+        
+            // Save the new settings
             settings.theta_ip = new_theta_ip;
             settings.theta_user = new_theta_user;
             settings.theta_pass = new_theta_pass;
-            settings.theta_res_x = parseInt(new_theta_res_x);
-            settings.theta_res_y = parseInt(new_theta_res_y);
-            settings.theta_fps = parseInt(new_theta_fps);
+            settings.theta_res_x = new_theta_res_x;
+            settings.theta_res_y = new_theta_res_y;
+            settings.theta_fps = new_theta_fps;
             settings.record_locally = new_record;
             settings.record_dir = new_record_dir;
 
-
-            /* Apply the settings using the Ricoh API */
-            // verify IP
-            var valid_ip = verifyThetaIp(settings.theta_ip);
-            console.log("Valid IP: " + valid_ip);    
-
-            // verify username / pass
-            var valid_login = verifyThetaLogin(settings.theta_user, settings.theta_pass);
-            console.log("Valid Login: " + valid_login);
-
-            // set never sleep
-            // set livepreview info
+            // Prevent the Theta from goin going in to sleep mode
+            setThetaNeverSleep();
+            // Set the streaming resolution
+            setThetaLivePreview(settings.theta_res_x, settings.theta_res_y, 
+                settings.theta_fps);
             
-
-            /* Tell user success / failure */
+            // TODO: inform user of success / failure
         }
 
         /* ==================================== */
@@ -171,7 +173,7 @@
         function openSideMenu() {
             document.getElementById("side_menu").style.width = "300px";
         }
-
+        
         /* Closes the side menu */
         function closeSideMenu() {
             document.getElementById("side_menu").style.width = "0";
@@ -191,13 +193,11 @@
         for (i = 0; i < x.length; i++) {
             selElmnt = x[i].getElementsByTagName("select")[0];
             selOptionIndex = selElmnt.options.selectedIndex;
-
             /* For each element, create a new DIV that will act as the selected item: */
             a = document.createElement("DIV");
             a.setAttribute("class", "select_selected");
             a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
             x[i].appendChild(a);
-
             /* For each element, create a new DIV that will contain the option list: */
             b = document.createElement("DIV");
             b.setAttribute("class", "select_items select_hide");
@@ -212,7 +212,6 @@
                 if (selOptionIndex == j) {
                     c.setAttribute("class", "same_as_selected");
                 }
-
                 /* Bind select function for when an option is clicked */
                 c.addEventListener("click", function(e) {
                     /* When an item is clicked, update the original select box,
@@ -237,7 +236,6 @@
                 
                 b.appendChild(c);
             }
-
             x[i].appendChild(b);
             a.addEventListener("click", function(e) {
                 /* When the select box is clicked, close any other select boxes,
@@ -273,21 +271,6 @@
         /* If the user clicks anywhere outside the select box,
         then close all select boxes: */
         document.addEventListener("click", closeAllSelect);
-        
-        /* ================================================ */
-        /* Selects a folder and updates the dir picker text */
-        /* ================================================ */
-        function selectFolder(e) {
-            // TODO: get full path
-            var iconHtml = "\n<input type=\"file\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\" webkitdirectory=\"\" mozdirectory=\"\" msdirectory=\"\" odirectory=\"\" directory=\"\" multiple=\"\">\n<span class=\"custom_file_btn fa fa-folder-open\"></span>\n"
-            var theFiles = e.target.files;
-            var relativePath = theFiles[0].webkitRelativePath;
-            var folder = relativePath.split("/");
-            var folderName = folder[0];
-            document.getElementById("setting_download_dir").innerHTML = 
-                folderName + iconHtml;
-        }
-
     </script>
 </body>
 </html>

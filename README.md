@@ -24,9 +24,15 @@ Built using:
 
 ### Goals
 
+* rename "settings_container" class to "side_menu_container" 
+* Add "Exit VR" button to A-Frame view
+* Combine the calls to disable sleep mode and set resolution, or create some
+  framework for combining option calls
+* Wrap up the API in a nice class
 * Add a "Connected / Not Connected" message to the main view telling people to 
   connect using the button.
-    * Add a "Connect / Disconnect" button in the top right
+    * ~~Add a "Connect / Disconnect" button~~ 
+    * toggle state of the connect/disconnect button
 * Add ability to detect failure to connect to the theta 
 * Add "Help" setting explanation tidbits to the UI in the browser
 * Make the rerender event be imported or something so I don't just have a magic
