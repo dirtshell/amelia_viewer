@@ -280,7 +280,6 @@ function getThetaLivePreview() {
 
             reader.read().then(({done, value}) => {
                 if (done) {
-                    controller.close(); // idk what this is for
                     return;
                 }
                 

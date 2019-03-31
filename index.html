@@ -127,45 +127,66 @@
         document.addEventListener(RERENDER_EVENT, function(e) {
                 canvas_img.src = e.detail;
             }, false);
+        
         // Start saving the stream whenever we connect and have "record" enabled
+        // TODO: add promises?
         document.addEventListener(STREAM_STARTED_EVENT, function(e) {
                 if (settings.record_locally) {
+                    // Check supported MIME types
+                    var types = [
+                         "video/webm",
+                         "video/mp4",
+                         "video/webm\;codecs=vp8",
+                         "video/webm\;codecs=daala",
+                         "video/webm\;codecs=h264",
+                         "video/mpeg"
+                    ];
+                    for (var i in types) {
+                        console.log( "Is " + types[i] + " supported? " + 
+                            (MediaRecorder.isTypeSupported(types[i]) ? "Maybe!" : "Nope :("));
+                    }
+                    
                     console.log("Recording the stream...");
-                    //var promiseStream = new Promise(function(resolve, reject) {
-                    //    canvas.captureStream(settings.theta_fps);
-                    //});
-                    //promiseStream.then(mediaStream => {
-                    var mediaStream = canvas.captureStream(settings.theta_fps);
-                        let fr = new FileReader;
-                        let mediaRecorder = new MediaRecorder(mediaStream);
-                        let chunks = Promise.resolve();
-                        let fileStream = streamSaver.createWriteStream(getDateTime() + '.mp4');
-                        let writer = fileStream.getWriter();
+                    var recordedChunks = [];    // stores all the video chunks
+                    var stream = canvas.captureStream(settings.theta_fps);
+                    var timeslice = 1000;   // save the blob every 1000 ms
+                    var options = {mimeType: 'video/webm'};
+                    var recorder = new MediaRecorder(stream, options);
+                    recorder.ondataavailable = handleDataAvailable;
+                    recorder.start(timeslice);   
 
-                        // Start recording
-                        mediaRecorder.start();
-
-                        // Handle stream closing
-                        document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
-                                console.log("Stopping stream recording...");
-                                mediaRecorder.stop();
-                                setTimeout(() => 
-                                        chunks.then(evt => writer.close())
-                                    , 1000);
-                            }, false);
-
-                        // Save stream data
-                        mediaRecorder.ondataavailable = ({blob}) => {
-                                chunks = chunks.then(() => new Promise(resolve => {
-                                        fr.onload = () => {
-                                                writer.write(new Uint8Array(fr.result))
-                                                resolve()
-                                        }
-                                        fr.readAsArrayBuffer(blob)
-                                }))
+                    function handleDataAvailable(event) {
+                        console.log("... handleDataAvailable triggered");
+                        if (event.data.size > 0) {
+                            console.log("... saving " + event.data.size + " bytes to recordedChunks");
+                            recordedChunks.push(event.data);
                         }
+                    }
 
-                    //})
+                    // Stop the recorder and prompt to donwload when the stream stops
+                    document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
+                            recorder.stop();    // stop recording
+                            var vidBlob = new Blob(recordedChunks, {type: 'video/webm'});
+                            var vidUrl = URL.createObjectURL(vidBlob);
+                            var a = document.createElement('a');
+                            document.body.appendChild(a);
+                            a.style = 'display: none';
+                            a.href = vidUrl;
+                            a.download = getDateTime() + '_stream.webm';
+                            a.click();
+                            window.URL.revokeObjectURL(vidUrl);
+                            return; // destroys the listner?
+                        }, false);
+                    
+                    /* alternate way of setting on data available 
+                    recorder.ondataavailable = function(e) {
+                        chunks.push(e.data);
+                    }
+    
+                    recorder.onstop = function(e) {
+                        console.log("stopping the recording...");
+
+                    }*/
                 }
             }, false);
         
