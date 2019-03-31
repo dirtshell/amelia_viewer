@@ -20,15 +20,29 @@
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
     <script type="text/javascript" src="/assets/js/aframe_components.js"></script>
     <script type="text/javascript" src="/assets/js/ricoh_api.js"></script>
-
+    <script type="text/javascript" src="/assets/js/StreamSaver.js"></script>
+    <script type="text/javascript" src="/assets/js/polyfill.min.js"></script>
+    <!--<script>
+        	// it also support commonJs and amd
+        import { createWriteStream, supported, version } from 'StreamSaver'
+        const { createWriteStream, supported, version } = require('StreamSaver')
+        const { createWriteStream, supported, version } = window.streamSaver
+        console.log( supported )
+    </script>-->
 </head>
 
 <body>
     <!-- A-Frame scene populated with Ricoh Theta VR stream -->
+    <!--
     <a-scene>
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
     </a-scene>
+    -->
+
+    <!-- Hidden canvas used to save video -->
+    <!-- TODO: may need to set the size of this element -->
+    <canvas id="hidden_stream_canvas"></canvas>
 
     <!-- Side menu -->
     <span id="menu_open_btn" onclick="openSideMenu()">&#9776;</span>
@@ -100,6 +114,62 @@
     </div>
 
     <script>
+        /* ================================ */
+        /* Saves the streamed video locally */
+        /* ================================ */
+        // Redraw each image to the hidden canvas so we can record it
+        var canvas = document.getElementById("hidden_stream_canvas");
+        var canvas_ctx = canvas.getContext("2d");
+        var canvas_img = new Image;
+        canvas_img.onload = function() {
+            canvas_ctx.drawImage(canvas_img, 0, 0);
+        };
+        document.addEventListener(RERENDER_EVENT, function(e) {
+                canvas_img.src = e.detail;
+            }, false);
+        // Start saving the stream whenever we connect and have "record" enabled
+        document.addEventListener(STREAM_STARTED_EVENT, function(e) {
+                if (settings.record_locally) {
+                    console.log("Recording the stream...");
+                    //var promiseStream = new Promise(function(resolve, reject) {
+                    //    canvas.captureStream(settings.theta_fps);
+                    //});
+                    //promiseStream.then(mediaStream => {
+                    var mediaStream = canvas.captureStream(settings.theta_fps);
+                        let fr = new FileReader;
+                        let mediaRecorder = new MediaRecorder(mediaStream);
+                        let chunks = Promise.resolve();
+                        let fileStream = streamSaver.createWriteStream(getDateTime() + '.mp4');
+                        let writer = fileStream.getWriter();
+
+                        // Start recording
+                        mediaRecorder.start();
+
+                        // Handle stream closing
+                        document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
+                                console.log("Stopping stream recording...");
+                                mediaRecorder.stop();
+                                setTimeout(() => 
+                                        chunks.then(evt => writer.close())
+                                    , 1000);
+                            }, false);
+
+                        // Save stream data
+                        mediaRecorder.ondataavailable = ({blob}) => {
+                                chunks = chunks.then(() => new Promise(resolve => {
+                                        fr.onload = () => {
+                                                writer.write(new Uint8Array(fr.result))
+                                                resolve()
+                                        }
+                                        fr.readAsArrayBuffer(blob)
+                                }))
+                        }
+
+                    //})
+                }
+            }, false);
+        
+
         /* ======================================= */
         /* Updates the "connect/disconnect" button */
         /* ======================================= */
@@ -113,19 +183,6 @@
                 document.getElementById("connect_btn").style.display = "none";
                 document.getElementById("disconnect_btn").style.display = "inline";
             }, false);
-
-        /*thetaStatus.registerListener(function(val) {
-            console.log("Value of thetaStatus.streaming was changed to " + val);
-            if (val == false) {
-                // we are disconnected, so show the connect btn
-                document.getElementById("connect_btn").style.display = "inline";
-                document.getElementById("disconnect_btn").style.display = "none";
-            } else {
-                // we are connected, so show the disconnect btn
-                document.getElementById("connect_btn").style.display = "none";
-                document.getElementById("disconnect_btn").style.display = "inline";
-            }
-        });*/
 
         /* ======================= */
         /* Apply settings function */
@@ -168,6 +225,10 @@
             settings.theta_fps = new_theta_fps;
             settings.record_locally = new_record;
             settings.record_dir = new_record_dir;
+
+            // Update the hidden canvas's size
+            canvas.width = settings.theta_res_x;
+            canvas.height = settings.theta_res_y;
 
             // Configure the Theta via the API
             try {
@@ -304,6 +365,34 @@
         /* If the user clicks anywhere outside the select box,
         then close all select boxes: */
         document.addEventListener("click", closeAllSelect);
+
+        /* Returns date as "year-month-day_hour-minute-sec" */
+        function getDateTime() {
+            var now     = new Date();
+            var year    = now.getFullYear();
+            var month   = now.getMonth()+1;
+            var day     = now.getDate();
+            var hour    = now.getHours();
+            var minute  = now.getMinutes();
+            var second  = now.getSeconds();
+            if(month.toString().length == 1) {
+                 month = '0'+month;
+            }
+            if(day.toString().length == 1) {
+                 day = '0'+day;
+            }
+            if(hour.toString().length == 1) {
+                 hour = '0'+hour;
+            }
+            if(minute.toString().length == 1) {
+                 minute = '0'+minute;
+            }
+            if(second.toString().length == 1) {
+                 second = '0'+second;
+            }
+            var dateTime = year+'-'+month+'-'+day+'_'+hour+'-'+minute+'-'+second;
+            return dateTime;
+        }
     </script>
 </body>
 </html>

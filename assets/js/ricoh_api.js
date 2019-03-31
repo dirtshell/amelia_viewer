@@ -13,7 +13,7 @@ var settings = {
     theta_res_x: 1024,              // horizontal resolution of the stream
     theta_res_y: 512,               // vertical resolution of the stream
     theta_fps: 30,                  // fps of the stream
-    record_locally: false,          // wether or not to record the video locally
+    record_locally: false,          // record the video locally (maybe shouldn't be here?)
     record_dir: ""                  // where to record the video locally
 };
 
@@ -184,7 +184,7 @@ function stopThetaLivePreview() {
         var result;
         iterNum = iterNum + 1;
         
-        console.log("Trying to stop the recording (attempt " + iterNum + ")");
+        console.log("Trying to stop the stream (attempt " + iterNum + ")");
         var stopRequest = new digestAuthRequest('POST', url, settings.theta_user, 
             settings.theta_pass);
         var stopData = { 
@@ -310,7 +310,7 @@ function getThetaLivePreview() {
                             new Blob([imageBuffer], {type: TYPE_JPEG}));
                         var reRenderEvent = new CustomEvent(RERENDER_EVENT, 
                             { detail: lastFrameImgUrl });
-                        document.getElementById(SKYBOX_ID).dispatchEvent(
+                        document.dispatchEvent(
                             reRenderEvent);
 
                         // Reset for the frame
