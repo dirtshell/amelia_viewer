@@ -5,7 +5,8 @@ let myConsole = new nodeConsole.Console(process.stdout, process.stderr);
 const {BrowserWindow, Menu, app, shell, dialog} = require('electron')
 
 // Template used for crossplatform compatible system menus
-let template = [{
+/* for if we ever go back to just electron based
+ let template = [{
     label: 'Application',
     submenu: [{
         label: 'Toggle Dev Tools',
@@ -30,6 +31,22 @@ let template = [{
             child.show()
         })
     }
+}]*/
+let template = [{
+    label: 'Application',
+    submenu: [{
+        label: 'Toggle Dev Tools',
+        click: (item, focusedWindow) => {
+            if(focusedWindow) {
+                focusedWindow.toggleDevTools()
+            }
+        }
+    }, {
+        label: 'Quit',
+        click: () => {
+            app.quit()
+        }
+    }]
 }]
 
 // IDK what this really does

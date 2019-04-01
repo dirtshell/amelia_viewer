@@ -1,0 +1,308 @@
+/* =============================== */
+/* Custom fil selector input */
+/* =============================== */
+/* customize the label here */
+.custom_dir_input_container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 14px;
+    color: #f1f1f1;
+    padding-top: 2px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.custom_dir_input {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.custom_file_btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 25px;
+    width: 20px;
+    transform: scale(1.25, 1.25);
+    color: #f1f1f1;
+}
+
+.custom_file_btn:hover {
+    color: #ccc;
+}
+
+/* ===================== */
+/* Custom checkbox input */
+/* ===================== */
+/* customize the label */
+.custom_checkbox_container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 14px;
+    color: #f1f1f1;
+    padding-top: 2px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* hide the default checkbox */
+.custom_checkbox_container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+}
+
+/* on mouse over add a gray background color */
+.custom_checkbox_container:hover input:enabled ~ .checkmark {
+    background-color: #ccc;
+}
+
+/* when the checkbox is checked add a blue green background */
+.custom_checkbox_container input:checked:enabled ~ .checkmark {
+    background-color: green;
+}
+
+/* create the checkmark when it is not checked */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* show the chekmark when checked */
+.custom_checkbox_container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* style the checkmark */
+.custom_checkbox_container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.custom_checkbox_container input:disabled {
+    background-color: #cccccc;
+}
+
+.custom_checkbox_container input:disabled ~ .checkmark::after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid #666666;
+    border-width: 0 3px 3px 0;
+}
+
+/* ================= */
+/* Custom text input */
+/* ================= */
+.custom_text_input {
+    width: 100%;
+    padding-left: 4px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+    background-color: #818181;
+    color: #ffffff;
+    font-size: 14px;
+    display: block;
+    border: none;
+}
+
+/* ===================== */
+/* Custom select element */
+/* ===================== */
+.custom_select {
+    width: 100%;
+}
+
+.custom_select select {
+    display: none;  /* hide original select element */
+}
+
+/* Custom select element to be assigned via javascript */
+.select_selected {
+    background-color: #111;
+}
+
+/* Arrow inside the select element TODO: make white on hover */
+.select_selected:after {
+    position: relative;
+    content: "";
+    top: 6px;
+    float: right;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: red transparent transparent transparent;
+    margin-right: 5px;
+}
+
+/* Point the arrow up when the select box is open */
+.select_selected.select_arrow_active:after {
+    border-color: transparent transparent red transparent;
+    top: 1px;
+    margin-right: 5px;
+}
+
+/* style the items, including the selected item */
+.select_items div,.select_selected {
+    width: 100%;
+    color: #ffffff;
+    background-color: #818181;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    border: 1px solid transparent;
+    border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+    cursor: pointer;
+}
+
+/* style items */
+.select_items {
+    position: relative;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 9999; /* maybe change this */
+}
+
+/* hide the items when the select box is closed */
+.select_hide {
+    display: none;
+}
+
+.same_as_selected {
+    background-color: rgb(83,83,83) !important;
+}
+
+.select_items div:hover{
+    background-color: rgb(83, 83, 83);
+}
+
+
+/* ======================== */
+/* Side menu                */
+/* ======================== */
+#side_menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.setting_container {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 32px;
+    padding-right: 15px;
+    min-width: 300px;   /* prevents the text moving on resizing */
+    display: block;
+}
+
+.setting_container:hover > .setting_title {
+    color: #f1f1f1;
+}
+
+.setting_title {
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+#menu_open_btn {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    z-index: 1000;
+    font-weight: bold;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+#menu_close_btn {
+    position: absolute;
+    top: 9px;
+    right: 25px;
+    font-size: 25px;
+    font-weight: bold;
+    transform: scale(2, 2);
+    margin-left: 50px;
+    padding: 8px 8px 8px 8px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+#apply_settings_btn {
+    float: right;
+    cursor: pointer;
+}
+
+#connect_btn {
+    width: 120px;
+    float: right;
+    padding: 10px 30px 10px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+#disconnect_btn {
+    width: 120px;
+    float: right;
+    padding: 10px 17.5px 10px 17.5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+button:disabled,
+button[disabled]{
+  background-color: #cccccc;
+  color: #666666;
+}
+
+@media screen and (max-height: 300px) {
+    #side_menu {padding-top: 15px;}
+    #side_menu a {font-size: 18px;}
+}

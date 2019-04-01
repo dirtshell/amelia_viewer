@@ -6,13 +6,22 @@
     <meta name="description" content="360 Video with A-Frame">
     <link rel="stylesheet" type="text/css" href="/assets/css/global.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/css/nativize.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/side_menu.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/flat_buttons.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/all.min.css">
+    <script type="text/javascript" src="/assets/js/all.min.js"></script>
+    <script type="text/javascript" src="/assets/js/async.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/async.min.js"></script>
     <script type="text/javascript" src="/assets/js/aframe.min.js"></script>
     <script type="text/javascript" src="/assets/js/digest-fetch-src.js"></script>
     <script type="text/javascript" src="/assets/js/md5_backup.js"></script>
     <script type="text/javascript" src="/assets/js/digestAuthRequest.js"></script>
     <script type="text/javascript" src="/assets/js/aframe_components.js"></script>
     <script type="text/javascript" src="/assets/js/ricoh_api.js"></script>
+    <script type="text/javascript" src="/assets/js/StreamSaver.js"></script>
+    <script type="text/javascript" src="/assets/js/polyfill.min.js"></script>
 </head>
 
 <body>
@@ -20,17 +29,478 @@
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
     </a-scene>
-    <div id="theta_control_panel" style="position: absolute; top:0px; left:0px; z-index:1000">
-        <p>Ricoh Theta Control Panel</p>
-        <button onclick="setThetaLivePreview(1920,960,8)">Set Live Preview to 1920x960 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(640,320,8)">Set Live Preview to 620x320 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(640,320,30)">Set Live Preview to 640x320 @ 30 FPS</button>
-        <button onclick="setThetaLivePreview(1024,512,8)">Set Live Preview to 1024x512 @ 8 FPS</button>
-        <button onclick="setThetaLivePreview(1024,512,30)">Set Live Preview to 1024x512 @ 30 FPS</button>
-        <button onclick="getThetaInfo()">Fetch Theta Info</button>
-        <button onclick="getThetaState()">Fetch Theta State</button>
-        <button onclick="setThetaNeverSleep()">Set Theta Never Sleep</button>
-        <button onclick="getThetaLivePreview()">Get Theta Live Preview</button>
+
+    <!-- Hidden canvas used to save video -->
+    <canvas id="hidden_stream_canvas" style="display: none"></canvas>
+
+    <!-- Side menu -->
+    <span id="menu_open_btn" onclick="openSideMenu()">&#9776;</span>
+    <div id="side_menu">
+        <a href="javascript:void(0)" id="menu_close_btn" onclick="closeSideMenu()">&times;</a>
+        <div class="setting_container">
+            <a class="setting_title" href="#">Resolution</a>
+            <div class="custom_select" id="setting_theta_resolution">
+                <select id="setting_theta_resolution_selector">
+                    <option value="1920_960">1920x960</option>
+                    <option value="1024_512">1024x512</option>
+                    <option value="640_320">640x320</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="setting_container">
+            <a class="setting_title" href="#">Framerate</a>
+            <div class="custom_select">
+                <select id="setting_theta_fps">
+                    <option value="8">8 FPS</option>
+                    <option value="30">30 FPS</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="setting_container">
+            <a class="setting_title" href="#">Ricoh Theta IP</a>
+            <input type="text" class="custom_text_input" id="setting_theta_ip" value="192.168.1.5">
+        </div>
+        
+        <div class="setting_container">
+            <a class="setting_title" href="#">Ricoh Theta Username</a>
+            <input type="text" class="custom_text_input" id="setting_theta_username" value="THETAYL00164391">
+        </div>
+        
+        <div class="setting_container">
+            <a class="setting_title" href="#">Ricoh Theta Password</a>
+            <input type="text" class="custom_text_input" id="setting_theta_password" value="00164391">
+        </div>
+        
+        <div class="setting_container">
+            <a class="setting_title" href="#">Record Stream</a>
+            <label class="custom_checkbox_container">Enable local recording
+                <input id="record_locally_checkbox" type="checkbox" checked="checked">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        
+        <div class="setting_container">
+            <a class="setting_title" href="#">Local Video Playback</a>
+            <label id="setting_download_dir" class="custom_dir_input_container">Select a video...
+                <input type="file" id="record_dir_field" accept="video/*" class="custom_dir_input" 
+                    name="setting_download_dir"/>
+                <span class="custom_file_btn fa fa-file-video"></span>
+            </label>
+            <div class="playback_controls" style="display: table;">
+                <button id="play_video" onclick="playLocalVideo()" class="btn btn-square btn-sm btn-filled-green">Play</button>
+                <button id="pause_video" onclick="pauseLocalVideo()" class="btn btn-square btn-sm btn-filled-yellow">Pause</button>
+                <button id="stop_video" onclick="stopLocalVideo()" class="btn btn-square btn-sm btn-filled-red">Stop</button>
+            </div>
+        </div>
+
+        <div class="setting_container">
+            <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue"
+                onclick="saveAndApplySettings()">Apply</button>
+            <button id="connect_btn" class="btn btn-square btn-filled-green"
+                onclick="connectToStream()">Connect</button>
+            <button id="disconnect_btn" class="btn btn-square btn-lg btn-filled-red"
+                onclick="disconnectFromStream()" style="display: none;">Disconnect</button>
+        </div>
     </div>
+
+    <script>
+        const localSceneHtml = '<a-scene><a-assets><video id="local_video_asset" src="YOUR_FILE_HERE" autoplay="false"></video></a-assets><a-videosphere material="src: #local_video_asset"></a-videosphere></a-scene>';
+        const streamSceneHtml = '<a-scene><a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" refresh-event="trigger_event: new_frame_loaded"></a-sky></a-scene>';
+
+        function connectToStream() {
+            /* Disable the local playback buttons */
+            document.querySelector("#record_dir_field").disabled = true;
+            document.querySelector("#play_video").disabled = true;
+            document.querySelector("#pause_video").disabled = true;
+            document.querySelector("#stop_video").disabled = true;
+
+            /* Get the live stream */
+            getThetaLivePreview();
+        }
+
+        function disconnectFromStream() {
+            /* Re-enable the local playback buttons */
+            document.querySelector("#record_dir_field").disabled = false;
+            document.querySelector("#play_video").disabled = false;
+            document.querySelector("#pause_video").disabled = false;
+            document.querySelector("#stop_video").disabled = false;
+
+            /* Stop the live stream */
+            stopThetaLivePreview();
+        }
+
+        /* ==================== */
+        /* Local video playback */
+        /* ==================== */
+        document.getElementById('record_dir_field').addEventListener('change', function(e) {
+            /* Update the select file UI */
+            var iconHtml = "\n<input id=\"record_dir_field\" type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
+            var fileName = e.target.files[0].name;
+            fileName = fileName.substring(0, 25) + "...";
+            document.getElementById("setting_download_dir").innerHTML = 
+                fileName + iconHtml;
+            
+            /* Delete the current a-frame scene */
+            var oldScene = document.querySelector('a-scene');
+            oldScene.parentNode.removeChild(oldScene);
+
+            /* Load up the local playback scene */
+            var fileURL = URL.createObjectURL(e.target.files[0]);
+            var moidifiedLocalSceneHtml = localSceneHtml.replace("YOUR_FILE_HERE", fileURL);
+            var newScene = createElementFromHTML(moidifiedLocalSceneHtml);
+            document.querySelector("body").prepend(newScene);
+
+            /* Stop the video from playing and go to the start */
+            var video = document.querySelector("#local_video_asset");
+            video.autoplay = false;
+            video.pause();
+            video.currentTime = 0;
+        }, false);
+
+        function pauseLocalVideo() {
+            /* Pause the video */
+            var video = document.querySelector("#local_video_asset");
+            video.pause();
+        }
+
+        function playLocalVideo() {
+            /* Disable the ricoh streaming buttons */
+            document.querySelector("#apply_settings_btn").disabled = true;
+            document.querySelector("#connect_btn").disabled = true;
+            document.querySelector("#record_locally_checkbox").disabled = true;
+            document.querySelector("#setting_theta_ip").disabled = true;
+            document.querySelector("#setting_theta_username").disabled = true;
+            document.querySelector("#setting_theta_password").disabled = true;
+            document.querySelector("#setting_theta_resolution_selector").disabled = true; // doesn't work
+            document.querySelector("#setting_theta_fps").disabled = true; // doesnt work
+            
+            /* Play the video */
+            var video = document.querySelector("#local_video_asset");
+            video.play();
+        }
+
+        function stopLocalVideo() {
+            /* Delete the local playback a-frame scene */
+            var oldScene = document.querySelector('a-scene');
+            oldScene.parentNode.removeChild(oldScene);
+
+            /* Load up the ricoh stream scene */
+            var newScene = createElementFromHTML(streamSceneHtml);
+            document.querySelector("body").prepend(newScene);
+            
+            /* Re-enable the ricoh streaming buttons */
+            document.querySelector("#apply_settings_btn").disabled = false;
+            document.querySelector("#connect_btn").disabled = false;
+            document.querySelector("#record_locally_checkbox").disabled = false;
+            document.querySelector("#setting_theta_ip").disabled = false;
+            document.querySelector("#setting_theta_username").disabled = false;
+            document.querySelector("#setting_theta_password").disabled = false;
+            document.querySelector("#setting_theta_resolution_selector").disabled = false;
+            document.querySelector("#setting_theta_fps").disabled = false;
+        }
+
+        /* ================================== */
+        /* Records the streamed video locally */
+        /* ================================== */
+        // Redraw each image to the hidden canvas so we can record it
+        var canvas = document.getElementById("hidden_stream_canvas");
+        var canvas_ctx = canvas.getContext("2d");
+        var canvas_img = new Image;
+        canvas_img.onload = function() {
+            canvas_ctx.drawImage(canvas_img, 0, 0);
+        };
+        document.addEventListener(RERENDER_EVENT, function(e) {
+                canvas_img.src = e.detail;
+            }, false);
+        
+        // Start saving the stream whenever we connect and have "record" enabled
+        document.addEventListener(STREAM_STARTED_EVENT, function(e) {
+                if (settings.record_locally) {
+                    // Check supported MIME types
+                    var types = [
+                         "video/webm",
+                         "video/mp4",
+                         "video/webm\;codecs=vp8",
+                         "video/webm\;codecs=daala",
+                         "video/webm\;codecs=h264",
+                         "video/mpeg"
+                    ];
+                    for (var i in types) {
+                        console.log( "Is " + types[i] + " supported? " + 
+                            (MediaRecorder.isTypeSupported(types[i]) ? "Maybe!" : "Nope :("));
+                    }
+                    
+                    console.log("Recording the stream...");
+                    var recordedChunks = [];    // stores all the video chunks
+                    var stream = canvas.captureStream(settings.theta_fps);
+                    var timeslice = 1000;   // save the blob every 1000 ms
+                    var options = {mimeType: 'video/webm'}; // TODO: vary bitrate by res+fps
+                    var recorder = new MediaRecorder(stream, options);
+                    recorder.ondataavailable = handleDataAvailable;
+                    recorder.start(timeslice);   
+
+                    function handleDataAvailable(event) {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    }
+
+                    // Stop the recorder and prompt to donwload when the stream stops
+                    document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
+                            recorder.stop();    // stop recording
+                            var vidBlob = new Blob(recordedChunks, {type: 'video/webm'});
+                            var vidUrl = URL.createObjectURL(vidBlob);
+                            var a = document.createElement('a');
+                            document.body.appendChild(a);
+                            a.style = 'display: none';
+                            a.href = vidUrl;
+                            a.download = getDateTime() + '_stream.webm';
+                            a.click();
+                            console.log("Recording stopped. Prompting user to save.");
+                            window.URL.revokeObjectURL(vidUrl);
+                            return; // destroys the listner?
+                        }, false);
+                }
+            }, false);
+        
+
+        /* ======================================= */
+        /* Updates the "connect/disconnect" button */
+        /* ======================================= */
+        document.addEventListener(STREAM_STOPPED_EVENT, function (e) {
+                // we are disconnected, so show the connect btn
+                document.getElementById("connect_btn").style.display = "inline";
+                document.getElementById("disconnect_btn").style.display = "none";
+            }, false);
+        document.addEventListener(STREAM_STARTED_EVENT, function (e) {
+                // we are disconnected, so show the connect btn
+                document.getElementById("connect_btn").style.display = "none";
+                document.getElementById("disconnect_btn").style.display = "inline";
+            }, false);
+
+        /* ======================= */
+        /* Apply settings function */
+        /* ======================= */
+        /* 
+         * Saves the settings, and then applies them using the Ricoh API.
+         *
+         * On success / failure, a message should pop up in a message queue on
+         * the side menu.
+         */
+        function saveAndApplySettings() {
+            /* Save the new settings */
+            // Get the new settings
+            var new_theta_ip = document.getElementById("setting_theta_ip").value;
+            var new_theta_user = document.getElementById("setting_theta_username").value;
+            var new_theta_pass = document.getElementById("setting_theta_password").value;
+            var new_theta_res_x = document.getElementById("setting_theta_resolution_selector").
+                value.split("_")[0];
+            var new_theta_res_y = document.getElementById("setting_theta_resolution_selector").
+                value.split("_")[1];
+            var new_theta_fps = document.getElementById("setting_theta_fps").value;
+            var new_record = document.getElementById("record_locally_checkbox").checked;
+            var new_record_dir = document.getElementById("record_dir_field").value; // TODO: figure this out
+
+            // Verify res and fps are valid combo
+            if (new_theta_res_x == "1920" && new_theta_res_y == "960" 
+                && new_theta_fps == "30") {
+                console.log("Invalid resolution and fps combo: " + new_theta_res_x + 
+                    "x" + new_theta_res_y + " @ " + new_theta_fps + " FPS");
+                // TODO: inform user
+                return false;
+            }
+        
+            // Save the new settings
+            settings.theta_ip = new_theta_ip;
+            settings.theta_user = new_theta_user;
+            settings.theta_pass = new_theta_pass;
+            settings.theta_res_x = new_theta_res_x;
+            settings.theta_res_y = new_theta_res_y;
+            settings.theta_fps = new_theta_fps;
+            settings.record_locally = new_record;
+            settings.record_dir = new_record_dir;
+
+            // Update the hidden canvas's size
+            canvas.width = settings.theta_res_x;
+            canvas.height = settings.theta_res_y;
+
+            // Configure the Theta via the API
+            try {
+                // Prevent the Theta from goin going in to sleep mode
+                setThetaNeverSleep();
+                // Set the streaming resolution
+                setThetaLivePreview(settings.theta_res_x, settings.theta_res_y, 
+                    settings.theta_fps);
+                // If we are currently streaming, restart the stream
+                if (thetaStatus.streaming) {
+                    stopThetaLivePreview();
+                    document.addEventListener(STREAM_STOPPED_EVENT, function(e) {
+                            getThetaLivePreview();
+                            // I know there is a better way to do this but IDGAF im tired
+                            document.removeEventListener(e.type, arguments.callee);
+                        }, false);
+                }
+            } catch (error) {
+                console.log("Failed to configure the Ricoh Theta V with the following options:" + 
+                    "\n\tIP: " + settings.theta_ip +
+                    "\n\tUSER: " + settings.theta_user + 
+                    "\n\tPASS: " + settings.theta_pass + 
+                    "\n\tRESOLUTION: " + settings.theta_res_x + "x" + settings.theta_res_y +
+                    "\n\tFPS: " + settings.theta_fps + 
+                    "\nWith error " + error);
+            }
+
+
+            // TODO: inform user of success / failure
+        }
+
+        /* ==================================== */
+        /* Slide menu controls                  */
+        /* ==================================== */
+        /* Opens the side menu */
+        function openSideMenu() {
+            document.getElementById("side_menu").style.width = "300px";
+        }
+        
+        /* Closes the side menu */
+        function closeSideMenu() {
+            document.getElementById("side_menu").style.width = "0";
+        }
+
+        /* ==================================== */
+        /* Code for custom dropdown select menu */
+        /* ==================================== */
+        var selOptionIndex; // index of the selected option in the <select> element
+        var selElmnt;       // <select> element currently being styled
+        var x;              // list of custom <select> elements to be styled
+        var i;              // index of the custom <select> element in x
+        var j;              // index of the option in the current custom <select> element
+        var a, b, c;        // custom divs used to create each option
+        /* On load look for any elements with the class "custom_select" and style them */
+        x = document.getElementsByClassName("custom_select");
+        for (i = 0; i < x.length; i++) {
+            selElmnt = x[i].getElementsByTagName("select")[0];
+            selOptionIndex = selElmnt.options.selectedIndex;
+            /* For each element, create a new DIV that will act as the selected item: */
+            a = document.createElement("DIV");
+            a.setAttribute("class", "select_selected");
+            a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+            x[i].appendChild(a);
+            /* For each element, create a new DIV that will contain the option list: */
+            b = document.createElement("DIV");
+            b.setAttribute("class", "select_items select_hide");
+            for (j = 0; j < selElmnt.length; j++) {
+                /* For each option in the original select element,
+                create a new DIV that will act as an option item: */
+                c = document.createElement("DIV");
+                c.innerHTML = selElmnt.options[j].innerHTML;
+                
+                /* Shim for setting the color for the selected option on load before an
+                   option is actually clicked */
+                if (selOptionIndex == j) {
+                    c.setAttribute("class", "same_as_selected");
+                }
+                /* Bind select function for when an option is clicked */
+                c.addEventListener("click", function(e) {
+                    /* When an item is clicked, update the original select box,
+                    and the selected item: */
+                    var y, i, k, s, h;
+                    s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+                    h = this.parentNode.previousSibling;
+                    for (i = 0; i < s.length; i++) {
+                        if (s.options[i].innerHTML == this.innerHTML) {
+                            s.selectedIndex = i;
+                            h.innerHTML = this.innerHTML;
+                            y = this.parentNode.getElementsByClassName("same_as_selected");
+                            for (k = 0; k < y.length; k++) {
+                                y[k].removeAttribute("class");
+                            }
+                            this.setAttribute("class", "same_as_selected");
+                            break;
+                        }
+                    }
+                    h.click();
+                });
+                
+                b.appendChild(c);
+            }
+            x[i].appendChild(b);
+            a.addEventListener("click", function(e) {
+                /* When the select box is clicked, close any other select boxes,
+                and open/close the current select box: */
+                e.stopPropagation();
+                closeAllSelect(this);
+                this.nextSibling.classList.toggle("select_hide");
+                this.classList.toggle("select_arrow_active");
+            });
+        }
+
+        function closeAllSelect(elmnt) {
+            /* A function that will close all select boxes in the document,
+            except the current select box: */
+            var x, y, i, arrNo = [];
+            x = document.getElementsByClassName("select_items");
+            y = document.getElementsByClassName("select_selected");
+            for (i = 0; i < y.length; i++) {
+                if (elmnt == y[i]) {
+                    arrNo.push(i)
+                } else {
+                    y[i].classList.remove("select_arrow_active");
+                }
+            }
+
+            for (i = 0; i < x.length; i++) {
+                if (arrNo.indexOf(i)) {
+                    x[i].classList.add("select_hide");
+                }
+            }
+        }
+
+        /* If the user clicks anywhere outside the select box,
+        then close all select boxes: */
+        document.addEventListener("click", closeAllSelect);
+
+        /* ============ */
+        /* Miscellanous */
+        /* ============ */
+        /* Cross browser supported method of creating an element froma string */
+        function createElementFromHTML(htmlString) {
+            var div = document.createElement('div');
+            div.innerHTML = htmlString.trim();
+
+            // Change this to div.childNodes to support multiple top-level nodes
+            return div.firstChild; 
+        }
+
+        /* Returns date as "year-month-day_hour-minute-sec" */
+        function getDateTime() {
+            var now     = new Date();
+            var year    = now.getFullYear();
+            var month   = now.getMonth()+1;
+            var day     = now.getDate();
+            var hour    = now.getHours();
+            var minute  = now.getMinutes();
+            var second  = now.getSeconds();
+            if(month.toString().length == 1) {
+                 month = '0'+month;
+            }
+            if(day.toString().length == 1) {
+                 day = '0'+day;
+            }
+            if(hour.toString().length == 1) {
+                 hour = '0'+hour;
+            }
+            if(minute.toString().length == 1) {
+                 minute = '0'+minute;
+            }
+            if(second.toString().length == 1) {
+                 second = '0'+second;
+            }
+            var dateTime = year+'-'+month+'-'+day+'_'+hour+'-'+minute+'-'+second;
+            return dateTime;
+        }
+    </script>
 </body>
 </html>

@@ -14,7 +14,7 @@ AFRAME.registerComponent('refresh-event', {
         var data = this.data;
         var el = this.el;
 
-        el.addEventListener(data.trigger_event, function(e) {
+        document.addEventListener(data.trigger_event, function(e) {
             //console.log("Received rerender event with object URL = " + e.detail);
             
             // Setup an event listener for when the image loads and needs to be updated
