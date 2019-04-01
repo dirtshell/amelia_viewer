@@ -90,6 +90,7 @@
             </label>
             <div class="playback_controls" style="display: table;">
                 <button id="play_video" onclick="playLocalVideo()" class="btn btn-square btn-sm btn-filled-green">Play</button>
+                <button id="pause_video" onclick="pauseLocalVideo()" class="btn btn-square btn-sm btn-filled-yellow">Pause</button>
                 <button id="stop_video" onclick="stopLocalVideo()" class="btn btn-square btn-sm btn-filled-red">Stop</button>
             </div>
         </div>
@@ -105,7 +106,7 @@
     </div>
 
     <script>
-        const localSceneHtml = '<a-scene><a-assets><video id="local_video_asset" src="YOUR_FILE_HERE" autoplay="false"></video></a-assets><a-videosphere src="#local_video_asset"></a-videosphere></a-scene>';
+        const localSceneHtml = '<a-scene><a-assets><video id="local_video_asset" src="YOUR_FILE_HERE" autoplay="false"></video></a-assets><a-videosphere material="src: #local_video_asset"></a-videosphere></a-scene>';
         const streamSceneHtml = '<a-scene><a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" refresh-event="trigger_event: new_frame_loaded"></a-sky></a-scene>';
 
         /* ==================== */
@@ -113,7 +114,7 @@
         /* ==================== */
         document.getElementById('record_dir_field').addEventListener('change', function(e) {
             /* Update the select file UI */
-            var iconHtml = "\n<input type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
+            var iconHtml = "\n<input id=\"record_dir_field\" type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
             var fileName = e.target.files[0].name;
             fileName = fileName.substring(0, 25) + "...";
             document.getElementById("setting_download_dir").innerHTML = 
@@ -131,11 +132,31 @@
 
             /* Stop the video from playing and go to the start */
             var video = document.querySelector("#local_video_asset");
+            video.autoplay = false;
             video.pause();
             video.currentTime = 0;
         }, false);
 
+        function pauseLocalVideo() {
+            /* Pause the video */
+            var video = document.querySelector("#local_video_asset");
+            video.pause();
+        }
+
         function playLocalVideo() {
+            /* Disable the ricoh streaming buttons */
+            document.querySelector("#apply_settings_btn").disabled = true;
+            document.querySelector("#connect_btn").disabled = true;
+            document.querySelector("#record_locally_checkbox").disabled = true;
+            document.querySelector("#setting_theta_ip").disabled = true;
+            document.querySelector("#setting_theta_username").disabled = true;
+            document.querySelector("#setting_theta_password").disabled = true;
+            document.querySelector("#setting_theta_resolution_selector").disabled = true; // doesn't work
+            document.querySelector("#setting_theta_fps").disabled = true; // doesnt work
+            
+            /* Play the video */
+            var video = document.querySelector("#local_video_asset");
+            video.play();
         }
 
         function stopLocalVideo() {
@@ -146,6 +167,16 @@
             /* Load up the ricoh stream scene */
             var newScene = createElementFromHTML(streamSceneHtml);
             document.querySelector("body").prepend(newScene);
+            
+            /* Re-enable the ricoh streaming buttons */
+            document.querySelector("#apply_settings_btn").disabled = false;
+            document.querySelector("#connect_btn").disabled = false;
+            document.querySelector("#record_locally_checkbox").disabled = false;
+            document.querySelector("#setting_theta_ip").disabled = false;
+            document.querySelector("#setting_theta_username").disabled = false;
+            document.querySelector("#setting_theta_password").disabled = false;
+            document.querySelector("#setting_theta_resolution_selector").disabled = false;
+            document.querySelector("#setting_theta_fps").disabled = false;
         }
 
         /* ================================== */

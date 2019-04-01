@@ -47,10 +47,10 @@
 .btn-filled-green {
   background-color: #2ecc71;
 }
-.btn-filled-green:hover {
+.btn-filled-green:hover:enabled {
   background-color: #25a25a;
 }
-.btn-filled-green:active {
+.btn-filled-green:active:enabled {
   -moz-box-shadow: inset 0 0 100px #1b7943;
   -webkit-box-shadow: inset 0 0 100px #1b7943;
   box-shadow: inset 0 0 100px #1b7943;
@@ -59,10 +59,10 @@
 .btn-filled-blue {
   background-color: #3498db;
 }
-.btn-filled-blue:hover {
+.btn-filled-blue:hover:enabled {
   background-color: #217dbb;
 }
-.btn-filled-blue:active {
+.btn-filled-blue:active:enabled {
   -moz-box-shadow: inset 0 0 100px #196090;
   -webkit-box-shadow: inset 0 0 100px #196090;
   box-shadow: inset 0 0 100px #196090;
@@ -71,10 +71,10 @@
 .btn-filled-red {
   background-color: #e74c3c;
 }
-.btn-filled-red:hover {
+.btn-filled-red:hover:enabled {
   background-color: #d62c1a;
 }
-.btn-filled-red:active {
+.btn-filled-red:active:enabled {
   -moz-box-shadow: inset 0 0 100px #a82315;
   -webkit-box-shadow: inset 0 0 100px #a82315;
   box-shadow: inset 0 0 100px #a82315;
@@ -83,10 +83,10 @@
 .btn-filled-orange {
   background-color: #e67e22;
 }
-.btn-filled-orange:hover {
+.btn-filled-orange:hover:enabled {
   background-color: #bf6516;
 }
-.btn-filled-orange:active {
+.btn-filled-orange:active:enabled {
   -moz-box-shadow: inset 0 0 100px #924d10;
   -webkit-box-shadow: inset 0 0 100px #924d10;
   box-shadow: inset 0 0 100px #924d10;
@@ -95,10 +95,10 @@
 .btn-filled-yellow {
   background-color: #f1c40f;
 }
-.btn-filled-yellow:hover {
+.btn-filled-yellow:hover:enabled {
   background-color: #c29d0b;
 }
-.btn-filled-yellow:active {
+.btn-filled-yellow:active:enabled {
   -moz-box-shadow: inset 0 0 100px #927608;
   -webkit-box-shadow: inset 0 0 100px #927608;
   box-shadow: inset 0 0 100px #927608;
@@ -107,10 +107,10 @@
 .btn-filled-grey {
   background-color: #7f8c8d;
 }
-.btn-filled-grey:hover {
+.btn-filled-grey:hover:enabled {
   background-color: #667273;
 }
-.btn-filled-grey:active {
+.btn-filled-grey:active:enabled {
   -moz-box-shadow: inset 0 0 100px #4e5758;
   -webkit-box-shadow: inset 0 0 100px #4e5758;
   box-shadow: inset 0 0 100px #4e5758;

@@ -75,12 +75,12 @@
 }
 
 /* on mouse over add a gray background color */
-.custom_checkbox_container:hover input ~ .checkmark {
+.custom_checkbox_container:hover input:enabled ~ .checkmark {
     background-color: #ccc;
 }
 
 /* when the checkbox is checked add a blue green background */
-.custom_checkbox_container input:checked ~ .checkmark {
+.custom_checkbox_container input:checked:enabled ~ .checkmark {
     background-color: green;
 }
 
@@ -107,6 +107,19 @@
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+}
+
+.custom_checkbox_container input:disabled {
+    background-color: #cccccc;
+}
+
+.custom_checkbox_container input:disabled ~ .checkmark::after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid #666666;
+    border-width: 0 3px 3px 0;
 }
 
 /* ================= */
@@ -281,6 +294,12 @@
     font-size: 1.2em;
     cursor: pointer;
     margin-right: 8px;
+}
+
+button:disabled,
+button[disabled]{
+  background-color: #cccccc;
+  color: #666666;
 }
 
 @media screen and (max-height: 300px) {

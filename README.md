@@ -68,6 +68,8 @@ string
   (streaming from Theta) or PLAYBACK (playing an uploaded video)
 * Replace the playback buttons with play / stop icons
 * Replace default scene with a message saying to either playback or begin streaming
+* make the dropdown selectors not work when disabled
+* Style the text box inputs and the dropdown selectors for indicating they are disabled
 * change the ids of all the "download_dir" stuff to "upload_file" or something
 * Add playback functionality using uploaded video
     * Select file to playback
