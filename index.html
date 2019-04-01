@@ -25,15 +25,9 @@
 </head>
 
 <body>
-    <!-- A-Frame scene populated with Ricoh Theta VR stream -->
     <a-scene>
-        <a-assets id="a_assets" timeout="999999999">
-            <video id="video_asset" src="NEVERLOADUNTILITELLYOU" autoplay="false">
-        </a-assets>
-        <!--
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
-        -->
     </a-scene>
 
     <!-- Hidden canvas used to save video -->
@@ -91,7 +85,7 @@
             <a class="setting_title" href="#">Local Video Playback</a>
             <label id="setting_download_dir" class="custom_dir_input_container">Select a video...
                 <input type="file" id="record_dir_field" accept="video/*" class="custom_dir_input" 
-                    name="setting_download_dir" onchange="selectVideoFile(event)"/>
+                    name="setting_download_dir"/>
                 <span class="custom_file_btn fa fa-file-video"></span>
             </label>
             <div class="playback_controls" style="display: table;">
@@ -111,54 +105,47 @@
     </div>
 
     <script>
+        const localSceneHtml = '<a-scene><a-assets><video id="local_video_asset" src="YOUR_FILE_HERE" autoplay="false"></video></a-assets><a-videosphere src="#local_video_asset"></a-videosphere></a-scene>';
+        const streamSceneHtml = '<a-scene><a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" refresh-event="trigger_event: new_frame_loaded"></a-sky></a-scene>';
+
         /* ==================== */
         /* Local video playback */
         /* ==================== */
-        function selectVideoFile(e) {
+        document.getElementById('record_dir_field').addEventListener('change', function(e) {
             /* Update the select file UI */
-            var iconHtml = "\n<input type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
+            var iconHtml = "\n<input type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
             var fileName = e.target.files[0].name;
             fileName = fileName.substring(0, 25) + "...";
             document.getElementById("setting_download_dir").innerHTML = 
                 fileName + iconHtml;
             
-            /* Add the video to the UI */
-            console.log("loading for local playback");
-            // Get the video file from the file input
-            var file = e.target.files[0];
-            var type = file.type;
-           // var videoNode = document.createElement('VIDEO');
-           // var canPlay = videoNode.canPlayType(type);
-           // if (canPlay === '') canPlay = 'no';
-           // var message = 'Can play type "' + type + '": ' + canPlay;
-           // console.log(message)
-           var fileURL = URL.createObjectURL(file);
-           // videoNode.src = fileURL;
-           // videoNode.id = "local_video";
-           // videoNode.autoplay = "false";   // maybe wrong
+            /* Delete the current a-frame scene */
+            var oldScene = document.querySelector('a-scene');
+            oldScene.parentNode.removeChild(oldScene);
 
-            // Update the source of the <video> element to <a-assets>
-            var a_assets = document.getElementById("video_asset");
-            a_assets.src = fileURL;
+            /* Load up the local playback scene */
+            var fileURL = URL.createObjectURL(e.target.files[0]);
+            var moidifiedLocalSceneHtml = localSceneHtml.replace("YOUR_FILE_HERE", fileURL);
+            var newScene = createElementFromHTML(moidifiedLocalSceneHtml);
+            document.querySelector("body").prepend(newScene);
 
-            // Reload <a-assets>
-            
-
-            // Hide the a-sky
-            //document.getElementById("preview_image").style.display = "none";
-
-            // Add <a-entity> with the video
-            var a_video = createElementFromHTML("  <a-entity geometry=\"primitive: box\" material=\"src: #video_asset\"></a-entity>");
-            var a_scene = document.querySelector("a-scene");
-            a_scene.appendChild(a_video);
-            a_video.load();
-            document.getElementById("video_asset").load();
-        }
+            /* Stop the video from playing and go to the start */
+            var video = document.querySelector("#local_video_asset");
+            video.pause();
+            video.currentTime = 0;
+        }, false);
 
         function playLocalVideo() {
         }
 
         function stopLocalVideo() {
+            /* Delete the local playback a-frame scene */
+            var oldScene = document.querySelector('a-scene');
+            oldScene.parentNode.removeChild(oldScene);
+
+            /* Load up the ricoh stream scene */
+            var newScene = createElementFromHTML(streamSceneHtml);
+            document.querySelector("body").prepend(newScene);
         }
 
         /* ================================== */

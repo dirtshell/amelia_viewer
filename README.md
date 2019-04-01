@@ -67,6 +67,7 @@ string
 * Add message in upper right hand of aframe view saying we are either LIVE
   (streaming from Theta) or PLAYBACK (playing an uploaded video)
 * Replace the playback buttons with play / stop icons
+* Replace default scene with a message saying to either playback or begin streaming
 * change the ids of all the "download_dir" stuff to "upload_file" or something
 * Add playback functionality using uploaded video
     * Select file to playback
