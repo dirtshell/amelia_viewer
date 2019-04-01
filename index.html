@@ -99,15 +99,37 @@
             <button id="apply_settings_btn" class="btn btn-square btn-lg btn-filled-blue"
                 onclick="saveAndApplySettings()">Apply</button>
             <button id="connect_btn" class="btn btn-square btn-filled-green"
-                onclick="getThetaLivePreview()">Connect</button>
+                onclick="connectToStream()">Connect</button>
             <button id="disconnect_btn" class="btn btn-square btn-lg btn-filled-red"
-                onclick="stopThetaLivePreview()" style="display: none;">Disconnect</button>
+                onclick="disconnectFromStream()" style="display: none;">Disconnect</button>
         </div>
     </div>
 
     <script>
         const localSceneHtml = '<a-scene><a-assets><video id="local_video_asset" src="YOUR_FILE_HERE" autoplay="false"></video></a-assets><a-videosphere material="src: #local_video_asset"></a-videosphere></a-scene>';
         const streamSceneHtml = '<a-scene><a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" refresh-event="trigger_event: new_frame_loaded"></a-sky></a-scene>';
+
+        function connectToStream() {
+            /* Disable the local playback buttons */
+            document.querySelector("#record_dir_field").disabled = true;
+            document.querySelector("#play_video").disabled = true;
+            document.querySelector("#pause_video").disabled = true;
+            document.querySelector("#stop_video").disabled = true;
+
+            /* Get the live stream */
+            getThetaLivePreview();
+        }
+
+        function disconnectFromStream() {
+            /* Re-enable the local playback buttons */
+            document.querySelector("#record_dir_field").disabled = false;
+            document.querySelector("#play_video").disabled = false;
+            document.querySelector("#pause_video").disabled = false;
+            document.querySelector("#stop_video").disabled = false;
+
+            /* Stop the live stream */
+            stopThetaLivePreview();
+        }
 
         /* ==================== */
         /* Local video playback */
