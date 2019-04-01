@@ -35,9 +35,8 @@ Built using:
   connect using the button.
     * ~~Add a "Connect / Disconnect" button~~ 
     * ~~toggle state of the connect/disconnect button~~
-    * Add message to the aframe vr display saying when we have lost connection
+    * Add message to the aframe vr display saying when we have lost connection (FPS = 0)
 * Add ability to detect failure to connect to the theta 
-* Add "Help" setting explanation tidbits to the UI in the browser
 * Make the rerender event name be imported or something so I don't just have a magic
 string
 * Add proper inclusions to my JS because IDK wtf I am doing 
@@ -51,14 +50,28 @@ string
    * Give a simple diagnostic / control application that can be launched
 * ~~Add application menu~~
 * ~~Reorganize code so we don't have a ton of JS code in `index.html`~~
-* Rewrite FPS and Mbps calculation code
-* Write a Ricoh Theta to allow for 4K @ 30 FPS
+* Write a Ricoh Theta plugin to allow for 4K @ 30 FPS
 * ~~Method for stopping a stream~~
-* Method to detect the stream disconnecting
+* Method to detect the stream disconnecting (0 fps for ~3s?)
     * Be sure to emit event when we DC
     * Stop recording when we DC
-* Auto reset video stream when resolution changes
-* Add recording feature
-* Actually test with Occulus lol
+    * When Notify user in A-Frame
+* ~~Auto reset video stream when resolution changes~~
+* ~~Add recording feature~~
+* ~~Actually test with Occulus lol~~
 * Use `const myEvent = new Event(EVENT_NAME)` instead of creating them everytime
 * Change bitrate of recorded video based on resolution and FPS
+* Add [blinking recording](http://jsfiddle.net/rmq6Lt3g/1/) icon to A-Frame to 
+  say when we are recording
+* Light up the setting titles when we are editign their value
+* Add message in upper right hand of aframe view saying we are either LIVE
+  (streaming from Theta) or PLAYBACK (playing an uploaded video)
+* Replace the playback buttons with play / stop icons
+* change the ids of all the "download_dir" stuff to "upload_file" or something
+* Add playback functionality using uploaded video
+    * Select file to playback
+    * Create side-menu for local playback
+        * Select file
+        * Start playback btn
+        * Stop playback btn
+    * When you are playing back disable the `Apply` and `Connect` buttons

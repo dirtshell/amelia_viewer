@@ -27,13 +27,8 @@
 <body>
     <!-- A-Frame scene populated with Ricoh Theta VR stream -->
     <a-scene>
-        <a-assets id="a_assets" timeout="999999999">
-            <video id="video_asset" src="NEVERLOADUNTILITELLYOU" autoplay="false">
-        </a-assets>
-        <!--
         <a-sky id="preview_image" src="/assets/img/42341252701_f4de75cdf4_o.jpg" 
             refresh-event="trigger_event: new_frame_loaded"></a-sky>
-        -->
     </a-scene>
 
     <!-- Hidden canvas used to save video -->
@@ -90,7 +85,7 @@
         <div class="setting_container">
             <a class="setting_title" href="#">Local Video Playback</a>
             <label id="setting_download_dir" class="custom_dir_input_container">Select a video...
-                <input type="file" id="record_dir_field" accept="video/*" class="custom_dir_input" 
+                <input type="file" id="record_dir_field" class="custom_dir_input" 
                     name="setting_download_dir" onchange="selectVideoFile(event)"/>
                 <span class="custom_file_btn fa fa-file-video"></span>
             </label>
@@ -115,50 +110,12 @@
         /* Local video playback */
         /* ==================== */
         function selectVideoFile(e) {
-            /* Update the select file UI */
-            var iconHtml = "\n<input type=\"file\" accept=\"video/\*\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
+            var iconHtml = "\n<input type=\"file\" class=\"custom_dir_input\" name=\"setting_download_dir\" onchange=\"selectFolder(event)\">\n<span class=\"custom_file_btn fa fa-file-video\"></span>\n"
+            console.log(e.target);
             var fileName = e.target.files[0].name;
             fileName = fileName.substring(0, 25) + "...";
             document.getElementById("setting_download_dir").innerHTML = 
                 fileName + iconHtml;
-            
-            /* Add the video to the UI */
-            console.log("loading for local playback");
-            // Get the video file from the file input
-            var file = e.target.files[0];
-            var type = file.type;
-           // var videoNode = document.createElement('VIDEO');
-           // var canPlay = videoNode.canPlayType(type);
-           // if (canPlay === '') canPlay = 'no';
-           // var message = 'Can play type "' + type + '": ' + canPlay;
-           // console.log(message)
-           var fileURL = URL.createObjectURL(file);
-           // videoNode.src = fileURL;
-           // videoNode.id = "local_video";
-           // videoNode.autoplay = "false";   // maybe wrong
-
-            // Update the source of the <video> element to <a-assets>
-            var a_assets = document.getElementById("video_asset");
-            a_assets.src = fileURL;
-
-            // Reload <a-assets>
-            
-
-            // Hide the a-sky
-            //document.getElementById("preview_image").style.display = "none";
-
-            // Add <a-entity> with the video
-            var a_video = createElementFromHTML("  <a-entity geometry=\"primitive: box\" material=\"src: #video_asset\"></a-entity>");
-            var a_scene = document.querySelector("a-scene");
-            a_scene.appendChild(a_video);
-            a_video.load();
-            document.getElementById("video_asset").load();
-        }
-
-        function playLocalVideo() {
-        }
-
-        function stopLocalVideo() {
         }
 
         /* ================================== */
@@ -425,15 +382,6 @@
         /* ============ */
         /* Miscellanous */
         /* ============ */
-        /* Cross browser supported method of creating an element froma string */
-        function createElementFromHTML(htmlString) {
-            var div = document.createElement('div');
-            div.innerHTML = htmlString.trim();
-
-            // Change this to div.childNodes to support multiple top-level nodes
-            return div.firstChild; 
-        }
-
         /* Returns date as "year-month-day_hour-minute-sec" */
         function getDateTime() {
             var now     = new Date();
