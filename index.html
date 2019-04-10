@@ -143,6 +143,7 @@
                 fileName + iconHtml;
             
             /* Delete the current a-frame scene */
+			document.querySelector('a-scene').exitVR();
             var oldScene = document.querySelector('a-scene');
             oldScene.parentNode.removeChild(oldScene);
 
@@ -183,6 +184,7 @@
 
         function stopLocalVideo() {
             /* Delete the local playback a-frame scene */
+			document.querySelector('a-scene').exitVR();
             var oldScene = document.querySelector('a-scene');
             oldScene.parentNode.removeChild(oldScene);
 
